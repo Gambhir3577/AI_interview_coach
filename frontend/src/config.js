@@ -1,0 +1,2 @@
+// API configuration supporting both local proxy and Vercel/production endpoints
+export const API_BASE = (import.meta.env.VITE_API_URL || '').replace(/\/$/, '');

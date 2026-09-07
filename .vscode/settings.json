@@ -1,0 +1,12 @@
+{
+  "python.defaultInterpreterPath": "${workspaceFolder}/venv_test/bin/python3",
+  "python.analysis.extraPaths": [
+    "${workspaceFolder}/backend"
+  ],
+  "python.autoComplete.extraPaths": [
+    "${workspaceFolder}/backend"
+  ],
+  "terminal.integrated.env.osx": {
+    "PYTHONPATH": "${workspaceFolder}/backend"
+  }
+}
