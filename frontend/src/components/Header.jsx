@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { Mic, Sparkles, History, LogOut, User, CheckCircle2 } from 'lucide-react';
+import { Mic, Sparkles, History, LogOut, Sliders, CheckCircle2 } from 'lucide-react';
 import { API_BASE } from '../config.js';
 
-export function Header({ currentScreen, onNavigate, onOpenHistory, historyCount = 0, user = null, onLogout }) {
+export function Header({ currentScreen, onNavigate, onOpenHistory, onOpenProfileSettings, historyCount = 0, user = null, onLogout }) {
   const [backendStatus, setBackendStatus] = useState('checking');
 
   useEffect(() => {
@@ -38,6 +38,16 @@ export function Header({ currentScreen, onNavigate, onOpenHistory, historyCount 
       case 'data': return 'Data & AI';
       case 'general': return 'Leadership';
       default: return 'Candidate';
+    }
+  };
+
+  const getAvatarGradient = (gradientId) => {
+    switch (gradientId) {
+      case 'cyan': return 'linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%)';
+      case 'emerald': return 'linear-gradient(135deg, #10b981 0%, #059669 100%)';
+      case 'rose': return 'linear-gradient(135deg, #ec4899 0%, #f43f5e 100%)';
+      case 'amber': return 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)';
+      default: return 'linear-gradient(135deg, #6366f1 0%, #a855f7 100%)';
     }
   };
 
@@ -158,11 +168,35 @@ export function Header({ currentScreen, onNavigate, onOpenHistory, historyCount 
           </button>
         )}
 
-        {/* User Profile Pill & Logout */}
+        {/* Settings & Profile Button (When logged in) */}
+        {user && onOpenProfileSettings && (
+          <button
+            onClick={onOpenProfileSettings}
+            className="btn btn-secondary"
+            style={{ fontSize: '0.85rem', padding: '7px 12px' }}
+            title="Profile & AI Coach Settings"
+          >
+            <Sliders size={16} color="#a855f7" />
+            <span>Settings</span>
+          </button>
+        )}
+
+        {/* User Profile Pill */}
         {user ? (
-          <div className="user-profile-badge">
-            <div className="user-avatar-circle">
-              {getInitials(user.name)}
+          <div
+            className="user-profile-badge"
+            style={{ cursor: onOpenProfileSettings ? 'pointer' : 'default' }}
+            onClick={() => onOpenProfileSettings && onOpenProfileSettings()}
+            title="Click to edit profile & settings"
+          >
+            <div
+              className="user-avatar-circle"
+              style={{
+                background: getAvatarGradient(user.avatarGradient),
+                fontSize: user.avatarEmoji ? '1.1rem' : '0.8rem'
+              }}
+            >
+              {user.avatarEmoji || getInitials(user.name)}
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', lineHeight: 1.2 }}>
               <span style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-primary)' }}>
@@ -173,7 +207,10 @@ export function Header({ currentScreen, onNavigate, onOpenHistory, historyCount 
               </span>
             </div>
             <button
-              onClick={onLogout}
+              onClick={(e) => {
+                e.stopPropagation();
+                onLogout();
+              }}
               title="Sign Out"
               style={{
                 background: 'none',
@@ -198,4 +235,5 @@ export function Header({ currentScreen, onNavigate, onOpenHistory, historyCount 
     </header>
   );
 }
+
 

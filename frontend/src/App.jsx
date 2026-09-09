@@ -5,6 +5,7 @@ import { CategorySelect } from './components/CategorySelect.jsx';
 import { RecordingScreen } from './components/RecordingScreen.jsx';
 import { FeedbackReport } from './components/FeedbackReport.jsx';
 import { HistoryModal } from './components/HistoryModal.jsx';
+import { ProfileSettingsModal } from './components/ProfileSettingsModal.jsx';
 import { API_BASE } from './config.js';
 
 export default function App() {
@@ -21,6 +22,7 @@ export default function App() {
   const [selectedQuestion, setSelectedQuestion] = useState(null);
   const [currentReport, setCurrentReport] = useState(null);
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
+  const [isProfileSettingsOpen, setIsProfileSettingsOpen] = useState(false);
   const [historyCount, setHistoryCount] = useState(0);
 
   // Fetch initial history count
@@ -50,6 +52,13 @@ export default function App() {
     setCurrentScreen('category');
   };
 
+  const handleUpdateUser = (updatedProfile) => {
+    setUser(updatedProfile);
+    try {
+      localStorage.setItem('ai_coach_user', JSON.stringify(updatedProfile));
+    } catch (e) {}
+  };
+
   const handleLogout = () => {
     setUser(null);
     try {
@@ -57,6 +66,7 @@ export default function App() {
     } catch (e) {}
     setSelectedQuestion(null);
     setCurrentReport(null);
+    setIsProfileSettingsOpen(false);
     setCurrentScreen('category');
   };
 
@@ -92,6 +102,7 @@ export default function App() {
         currentScreen={currentScreen}
         onNavigate={(screen) => setCurrentScreen(screen)}
         onOpenHistory={() => setIsHistoryOpen(true)}
+        onOpenProfileSettings={() => setIsProfileSettingsOpen(true)}
         historyCount={historyCount}
         user={user}
         onLogout={handleLogout}
@@ -135,6 +146,15 @@ export default function App() {
         isOpen={isHistoryOpen}
         onClose={() => setIsHistoryOpen(false)}
         onSelectPastSession={handleSelectPastSession}
+      />
+
+      {/* Profile & Settings Modal */}
+      <ProfileSettingsModal
+        isOpen={isProfileSettingsOpen}
+        onClose={() => setIsProfileSettingsOpen(false)}
+        user={user}
+        onUpdateUser={handleUpdateUser}
+        onLogout={handleLogout}
       />
 
       {/* Subtle App Footer */}
