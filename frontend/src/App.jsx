@@ -6,6 +6,11 @@ import { RecordingScreen } from './components/RecordingScreen.jsx';
 import { FeedbackReport } from './components/FeedbackReport.jsx';
 import { HistoryModal } from './components/HistoryModal.jsx';
 import { ProfileSettingsModal } from './components/ProfileSettingsModal.jsx';
+import { ResumeJDModal } from './components/ResumeJDModal.jsx';
+import { SalaryNegotiationView } from './components/SalaryNegotiationView.jsx';
+import { CheatSheetView } from './components/CheatSheetView.jsx';
+import { DebriefView } from './components/DebriefView.jsx';
+import { AnalyticsDashboardModal } from './components/AnalyticsDashboardModal.jsx';
 import { API_BASE } from './config.js';
 
 export default function App() {
@@ -18,14 +23,18 @@ export default function App() {
     }
   });
 
-  const [currentScreen, setCurrentScreen] = useState('category'); // 'category' | 'recording' | 'report'
+  const [currentLang, setCurrentLang] = useState('en');
+  const [currentScreen, setCurrentScreen] = useState('category'); // 'category' | 'recording' | 'report' | 'negotiation' | 'cheatsheet' | 'debrief'
   const [selectedQuestion, setSelectedQuestion] = useState(null);
   const [currentReport, setCurrentReport] = useState(null);
+  
+  // Modals
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   const [isProfileSettingsOpen, setIsProfileSettingsOpen] = useState(false);
+  const [isResumeJDOpen, setIsResumeJDOpen] = useState(false);
+  const [isAnalyticsOpen, setIsAnalyticsOpen] = useState(false);
   const [historyCount, setHistoryCount] = useState(0);
 
-  // Fetch initial history count
   const refreshHistoryCount = async () => {
     try {
       const res = await fetch(`${API_BASE}/history?limit=100`);
@@ -33,9 +42,7 @@ export default function App() {
         const data = await res.json();
         setHistoryCount(data.length);
       }
-    } catch (e) {
-      // Backend may be starting
-    }
+    } catch (e) {}
   };
 
   useEffect(() => {
@@ -97,18 +104,25 @@ export default function App() {
 
   return (
     <div className="app-container">
-      {/* App Header */}
+      {/* Top Application Header */}
       <Header
         currentScreen={currentScreen}
         onNavigate={(screen) => setCurrentScreen(screen)}
         onOpenHistory={() => setIsHistoryOpen(true)}
         onOpenProfileSettings={() => setIsProfileSettingsOpen(true)}
+        onOpenResumeJD={() => setIsResumeJDOpen(true)}
+        onOpenNegotiation={() => setCurrentScreen('negotiation')}
+        onOpenCheatSheets={() => setCurrentScreen('cheatsheet')}
+        onOpenDebrief={() => setCurrentScreen('debrief')}
+        onOpenAnalytics={() => setIsAnalyticsOpen(true)}
+        currentLang={currentLang}
+        onSelectLang={(lang) => setCurrentLang(lang)}
         historyCount={historyCount}
         user={user}
         onLogout={handleLogout}
       />
 
-      {/* Main Screen Content */}
+      {/* Main View Container */}
       <main>
         {!user ? (
           <AuthScreen onLoginSuccess={handleLoginSuccess} />
@@ -117,7 +131,11 @@ export default function App() {
             {currentScreen === 'category' && (
               <CategorySelect
                 onSelectQuestion={handleSelectQuestion}
-                defaultCategory="behavioral"
+                onOpenResumeJD={() => setIsResumeJDOpen(true)}
+                onOpenNegotiation={() => setCurrentScreen('negotiation')}
+                onOpenCheatSheets={() => setCurrentScreen('cheatsheet')}
+                onOpenDebrief={() => setCurrentScreen('debrief')}
+                onOpenAnalytics={() => setIsAnalyticsOpen(true)}
               />
             )}
 
@@ -137,18 +155,35 @@ export default function App() {
                 onOpenHistory={() => setIsHistoryOpen(true)}
               />
             )}
+
+            {currentScreen === 'negotiation' && (
+              <SalaryNegotiationView
+                onBack={() => setCurrentScreen('category')}
+              />
+            )}
+
+            {currentScreen === 'cheatsheet' && (
+              <CheatSheetView
+                onBack={() => setCurrentScreen('category')}
+              />
+            )}
+
+            {currentScreen === 'debrief' && (
+              <DebriefView
+                onBack={() => setCurrentScreen('category')}
+              />
+            )}
           </>
         )}
       </main>
 
-      {/* Session History Modal */}
+      {/* Modals */}
       <HistoryModal
         isOpen={isHistoryOpen}
         onClose={() => setIsHistoryOpen(false)}
         onSelectPastSession={handleSelectPastSession}
       />
 
-      {/* Profile & Settings Modal */}
       <ProfileSettingsModal
         isOpen={isProfileSettingsOpen}
         onClose={() => setIsProfileSettingsOpen(false)}
@@ -157,7 +192,18 @@ export default function App() {
         onLogout={handleLogout}
       />
 
-      {/* Subtle App Footer */}
+      <ResumeJDModal
+        isOpen={isResumeJDOpen}
+        onClose={() => setIsResumeJDOpen(false)}
+        onLaunchQuestion={handleSelectQuestion}
+      />
+
+      <AnalyticsDashboardModal
+        isOpen={isAnalyticsOpen}
+        onClose={() => setIsAnalyticsOpen(false)}
+      />
+
+      {/* App Footer */}
       <footer
         style={{
           marginTop: '60px',
@@ -171,10 +217,10 @@ export default function App() {
         }}
       >
         <div>
-          AI Interview Coach &bull; Local OpenAI Whisper + MediaPipe Face Mesh + Anthropic Claude Orchestration
+          AI Interview Coach Pro &bull; Local OpenAI Whisper + MediaPipe Mesh + Anthropic Claude Orchestration
         </div>
         <div style={{ fontSize: '0.72rem', color: '#475569' }}>
-          Engineered for high-impact mock interview preparation &bull; Fully on-device video extraction & speech metrics
+          Real-time speech transcription &bull; Follow-up probing &bull; STAR guidance &bull; Salary negotiation &bull; Multi-language
         </div>
       </footer>
     </div>

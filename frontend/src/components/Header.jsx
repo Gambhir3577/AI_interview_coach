@@ -1,9 +1,40 @@
 import React, { useEffect, useState } from 'react';
-import { Mic, Sparkles, History, LogOut, Sliders, CheckCircle2 } from 'lucide-react';
+import { 
+  Mic, 
+  Sparkles, 
+  History, 
+  LogOut, 
+  Sliders, 
+  CheckCircle2, 
+  Globe, 
+  FileText, 
+  DollarSign, 
+  BookOpen, 
+  FileCheck, 
+  TrendingUp,
+  Award
+} from 'lucide-react';
 import { API_BASE } from '../config.js';
+import { LANGUAGES } from '../i18n.js';
 
-export function Header({ currentScreen, onNavigate, onOpenHistory, onOpenProfileSettings, historyCount = 0, user = null, onLogout }) {
+export function Header({
+  currentScreen,
+  onNavigate,
+  onOpenHistory,
+  onOpenProfileSettings,
+  onOpenResumeJD,
+  onOpenNegotiation,
+  onOpenCheatSheets,
+  onOpenDebrief,
+  onOpenAnalytics,
+  currentLang = 'en',
+  onSelectLang,
+  historyCount = 0,
+  user = null,
+  onLogout
+}) {
   const [backendStatus, setBackendStatus] = useState('checking');
+  const [isLangMenuOpen, setIsLangMenuOpen] = useState(false);
 
   useEffect(() => {
     const checkHealth = async () => {
@@ -31,16 +62,6 @@ export function Header({ currentScreen, onNavigate, onOpenHistory, onOpenProfile
     return name.slice(0, 2).toUpperCase();
   };
 
-  const getTrackLabel = (trackId) => {
-    switch (trackId) {
-      case 'swe': return 'Software Eng';
-      case 'pm': return 'Product Mgr';
-      case 'data': return 'Data & AI';
-      case 'general': return 'Leadership';
-      default: return 'Candidate';
-    }
-  };
-
   const getAvatarGradient = (gradientId) => {
     switch (gradientId) {
       case 'cyan': return 'linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%)';
@@ -51,189 +72,285 @@ export function Header({ currentScreen, onNavigate, onOpenHistory, onOpenProfile
     }
   };
 
+  const activeLangObj = LANGUAGES.find(l => l.code === currentLang) || LANGUAGES[0];
+
   return (
     <header
       style={{
         display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        padding: '16px 24px',
-        marginBottom: '28px',
-        background: 'rgba(15, 23, 42, 0.65)',
+        flexDirection: 'column',
+        gap: '12px',
+        marginBottom: '24px',
+        background: 'rgba(15, 23, 42, 0.7)',
         backdropFilter: 'blur(20px)',
         WebkitBackdropFilter: 'blur(20px)',
         border: '1px solid var(--border-subtle)',
         borderRadius: 'var(--radius-lg)',
-        boxShadow: 'var(--shadow-glass)'
+        boxShadow: 'var(--shadow-glass)',
+        padding: '16px 22px'
       }}
     >
-      {/* Brand Logo & Title */}
-      <div
-        onClick={() => user && onNavigate('category')}
-        style={{ display: 'flex', alignItems: 'center', gap: '14px', cursor: user ? 'pointer' : 'default' }}
-      >
+      {/* Top Main Row */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
+        {/* Brand Logo & Title */}
         <div
-          style={{
-            width: 44,
-            height: 44,
-            borderRadius: '12px',
-            background: 'linear-gradient(135deg, #6366f1 0%, #a855f7 100%)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            boxShadow: '0 0 20px rgba(99, 102, 241, 0.4)'
-          }}
+          onClick={() => user && onNavigate('category')}
+          style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: user ? 'pointer' : 'default' }}
         >
-          <Mic size={24} color="#ffffff" />
-        </div>
-        <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <h1 style={{ fontSize: '1.25rem', fontWeight: 800, letterSpacing: '-0.02em', margin: 0 }}>
-              AI Interview <span className="gradient-text">Coach</span>
-            </h1>
-            <span
-              style={{
-                fontSize: '0.65rem',
-                fontWeight: 700,
-                padding: '2px 8px',
-                borderRadius: '9999px',
-                background: 'rgba(99, 102, 241, 0.2)',
-                color: '#a5b4fc',
-                border: '1px solid rgba(99, 102, 241, 0.4)'
-              }}
-            >
-              PRO
-            </span>
-          </div>
-          <p style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', margin: 0 }}>
-            Multimodal Speech, Content & Eye-Contact Feedback
-          </p>
-        </div>
-      </div>
-
-      {/* Action Buttons, Profile & Status */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
-        {/* Backend Connectivity Status Pill */}
-        <div
-          title={backendStatus === 'connected' ? 'FastAPI Backend Live' : 'Backend connection issues'}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '6px',
-            padding: '6px 12px',
-            borderRadius: '9999px',
-            fontSize: '0.75rem',
-            fontWeight: 600,
-            background: backendStatus === 'connected' ? 'rgba(16, 185, 129, 0.12)' : 'rgba(244, 63, 94, 0.12)',
-            color: backendStatus === 'connected' ? '#34d399' : '#fb7185',
-            border: `1px solid ${backendStatus === 'connected' ? 'rgba(16, 185, 129, 0.3)' : 'rgba(244, 63, 94, 0.3)'}`
-          }}
-        >
-          <span
+          <div
             style={{
-              width: 8,
-              height: 8,
-              borderRadius: '50%',
-              backgroundColor: backendStatus === 'connected' ? '#10b981' : '#f43f5e',
-              boxShadow: backendStatus === 'connected' ? '0 0 8px #10b981' : '0 0 8px #f43f5e'
+              width: 42,
+              height: 42,
+              borderRadius: '12px',
+              background: 'linear-gradient(135deg, #6366f1 0%, #ec4899 100%)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              boxShadow: '0 0 20px rgba(99, 102, 241, 0.4)'
             }}
-          />
-          <span>{backendStatus === 'connected' ? 'Engine Ready' : 'Connecting...'}</span>
-        </div>
-
-        {/* Practice History Button (When logged in) */}
-        {user && (
-          <button
-            onClick={onOpenHistory}
-            className="btn btn-secondary"
-            style={{ fontSize: '0.85rem', padding: '7px 12px' }}
           >
-            <History size={16} color="var(--primary-light)" />
-            <span>History</span>
-            {historyCount > 0 && (
+            <Mic size={22} color="#ffffff" />
+          </div>
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <h1 style={{ fontSize: '1.25rem', fontWeight: 800, letterSpacing: '-0.02em', margin: 0 }}>
+                AI Interview <span className="gradient-text">Coach Pro</span>
+              </h1>
               <span
                 style={{
-                  marginLeft: 4,
-                  padding: '1px 6px',
+                  fontSize: '0.65rem',
+                  fontWeight: 800,
+                  padding: '2px 8px',
                   borderRadius: '9999px',
-                  fontSize: '0.7rem',
-                  fontWeight: 700,
-                  background: 'var(--primary)',
-                  color: '#fff'
+                  background: 'rgba(99, 102, 241, 0.2)',
+                  color: '#a5b4fc',
+                  border: '1px solid rgba(99, 102, 241, 0.4)'
                 }}
               >
-                {historyCount}
+                PRO 2.0
               </span>
-            )}
-          </button>
-        )}
-
-        {/* Settings & Profile Button (When logged in) */}
-        {user && onOpenProfileSettings && (
-          <button
-            onClick={onOpenProfileSettings}
-            className="btn btn-secondary"
-            style={{ fontSize: '0.85rem', padding: '7px 12px' }}
-            title="Profile & AI Coach Settings"
-          >
-            <Sliders size={16} color="#a855f7" />
-            <span>Settings</span>
-          </button>
-        )}
-
-        {/* User Profile Pill */}
-        {user ? (
-          <div
-            className="user-profile-badge"
-            style={{ cursor: onOpenProfileSettings ? 'pointer' : 'default' }}
-            onClick={() => onOpenProfileSettings && onOpenProfileSettings()}
-            title="Click to edit profile & settings"
-          >
-            <div
-              className="user-avatar-circle"
-              style={{
-                background: getAvatarGradient(user.avatarGradient),
-                fontSize: user.avatarEmoji ? '1.1rem' : '0.8rem'
-              }}
-            >
-              {user.avatarEmoji || getInitials(user.name)}
             </div>
-            <div style={{ display: 'flex', flexDirection: 'column', lineHeight: 1.2 }}>
-              <span style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-primary)' }}>
+            <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', margin: 0 }}>
+              Multimodal Speech, Content, Vision & Negotiation AI
+            </p>
+          </div>
+        </div>
+
+        {/* Right Action Hub: Lang, Connectivity, History, Profile */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+          {/* Multilingual Selector */}
+          <div style={{ position: 'relative' }}>
+            <button
+              onClick={() => setIsLangMenuOpen(!isLangMenuOpen)}
+              className="btn btn-secondary"
+              style={{ fontSize: '0.78rem', padding: '6px 10px' }}
+              title="Change Interface Language"
+            >
+              <Globe size={14} color="#38bdf8" />
+              <span>{activeLangObj.flag} {activeLangObj.code.toUpperCase()}</span>
+            </button>
+
+            {isLangMenuOpen && (
+              <div
+                style={{
+                  position: 'absolute',
+                  top: '110%',
+                  right: 0,
+                  background: 'rgba(15, 23, 42, 0.95)',
+                  backdropFilter: 'blur(16px)',
+                  border: '1px solid rgba(99, 102, 241, 0.3)',
+                  borderRadius: '10px',
+                  padding: '6px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '2px',
+                  zIndex: 100,
+                  minWidth: '140px',
+                  boxShadow: '0 10px 30px rgba(0,0,0,0.7)'
+                }}
+              >
+                {LANGUAGES.map((lang) => (
+                  <div
+                    key={lang.code}
+                    onClick={() => {
+                      onSelectLang(lang.code);
+                      setIsLangMenuOpen(false);
+                    }}
+                    style={{
+                      padding: '6px 10px',
+                      borderRadius: '6px',
+                      cursor: 'pointer',
+                      fontSize: '0.8rem',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      background: currentLang === lang.code ? 'rgba(99, 102, 241, 0.25)' : 'transparent',
+                      color: currentLang === lang.code ? '#ffffff' : 'var(--text-secondary)'
+                    }}
+                  >
+                    <span>{lang.flag}</span>
+                    <span>{lang.label}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Backend Engine Status */}
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              padding: '6px 10px',
+              borderRadius: '9999px',
+              fontSize: '0.72rem',
+              fontWeight: 600,
+              background: backendStatus === 'connected' ? 'rgba(16, 185, 129, 0.12)' : 'rgba(244, 63, 94, 0.12)',
+              color: backendStatus === 'connected' ? '#34d399' : '#fb7185',
+              border: `1px solid ${backendStatus === 'connected' ? 'rgba(16, 185, 129, 0.3)' : 'rgba(244, 63, 94, 0.3)'}`
+            }}
+          >
+            <span
+              style={{
+                width: 7,
+                height: 7,
+                borderRadius: '50%',
+                backgroundColor: backendStatus === 'connected' ? '#10b981' : '#f43f5e'
+              }}
+            />
+            <span>{backendStatus === 'connected' ? 'AI Ready' : 'Connecting...'}</span>
+          </div>
+
+          {/* History Drawer Button */}
+          {user && (
+            <button
+              onClick={onOpenHistory}
+              className="btn btn-secondary"
+              style={{ fontSize: '0.8rem', padding: '6px 10px' }}
+            >
+              <History size={14} color="var(--primary-light)" />
+              <span>History</span>
+              {historyCount > 0 && (
+                <span
+                  style={{
+                    marginLeft: 2,
+                    padding: '1px 5px',
+                    borderRadius: '9999px',
+                    fontSize: '0.68rem',
+                    fontWeight: 700,
+                    background: 'var(--primary)',
+                    color: '#fff'
+                  }}
+                >
+                  {historyCount}
+                </span>
+              )}
+            </button>
+          )}
+
+          {/* User Profile Badge */}
+          {user ? (
+            <div
+              className="user-profile-badge"
+              style={{ cursor: onOpenProfileSettings ? 'pointer' : 'default', padding: '4px 10px' }}
+              onClick={() => onOpenProfileSettings && onOpenProfileSettings()}
+            >
+              <div
+                className="user-avatar-circle"
+                style={{
+                  width: 26,
+                  height: 26,
+                  background: getAvatarGradient(user.avatarGradient),
+                  fontSize: '0.75rem'
+                }}
+              >
+                {user.avatarEmoji || getInitials(user.name)}
+              </div>
+              <span style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-primary)' }}>
                 {user.name}
               </span>
-              <span style={{ fontSize: '0.68rem', color: '#a5b4fc', fontWeight: 600 }}>
-                {getTrackLabel(user.track)} {user.isGuest ? '(Guest)' : ''}
-              </span>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onLogout();
+                }}
+                title="Sign Out"
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: 'var(--text-muted)',
+                  cursor: 'pointer',
+                  padding: '2px',
+                  display: 'flex',
+                  alignItems: 'center'
+                }}
+              >
+                <LogOut size={14} />
+              </button>
             </div>
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                onLogout();
-              }}
-              title="Sign Out"
-              style={{
-                background: 'none',
-                border: 'none',
-                color: 'var(--text-muted)',
-                cursor: 'pointer',
-                padding: '4px',
-                display: 'flex',
-                alignItems: 'center',
-                marginLeft: '4px',
-                borderRadius: '6px',
-                transition: 'color var(--transition-fast)'
-              }}
-              onMouseEnter={(e) => e.currentTarget.style.color = '#f43f5e'}
-              onMouseLeave={(e) => e.currentTarget.style.color = 'var(--text-muted)'}
-            >
-              <LogOut size={16} />
-            </button>
-          </div>
-        ) : null}
+          ) : null}
+        </div>
       </div>
+
+      {/* Navigation Sub-Tabs (Studio, JD Matcher, Negotiation, Cheat Sheets, Debrief, Analytics) */}
+      {user && (
+        <div style={{ display: 'flex', gap: '6px', overflowX: 'auto', paddingTop: '4px', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+          <button
+            onClick={() => onNavigate('category')}
+            className={`btn ${currentScreen === 'category' || currentScreen === 'recording' || currentScreen === 'report' ? 'btn-primary' : 'btn-secondary'}`}
+            style={{ fontSize: '0.78rem', padding: '5px 12px' }}
+          >
+            <Mic size={14} />
+            <span>Practice Studio</span>
+          </button>
+
+          <button
+            onClick={onOpenResumeJD}
+            className="btn btn-secondary"
+            style={{ fontSize: '0.78rem', padding: '5px 12px' }}
+          >
+            <FileText size={14} color="#818cf8" />
+            <span>Resume & JD Matcher</span>
+          </button>
+
+          <button
+            onClick={() => onNavigate('negotiation')}
+            className={`btn ${currentScreen === 'negotiation' ? 'btn-primary' : 'btn-secondary'}`}
+            style={{ fontSize: '0.78rem', padding: '5px 12px' }}
+          >
+            <DollarSign size={14} color="#fbbf24" />
+            <span>Salary Negotiation</span>
+          </button>
+
+          <button
+            onClick={() => onNavigate('cheatsheet')}
+            className={`btn ${currentScreen === 'cheatsheet' ? 'btn-primary' : 'btn-secondary'}`}
+            style={{ fontSize: '0.78rem', padding: '5px 12px' }}
+          >
+            <BookOpen size={14} color="#22d3ee" />
+            <span>Role Cheat Sheets</span>
+          </button>
+
+          <button
+            onClick={() => onNavigate('debrief')}
+            className={`btn ${currentScreen === 'debrief' ? 'btn-primary' : 'btn-secondary'}`}
+            style={{ fontSize: '0.78rem', padding: '5px 12px' }}
+          >
+            <FileCheck size={14} color="#34d399" />
+            <span>Interview Debrief</span>
+          </button>
+
+          <button
+            onClick={onOpenAnalytics}
+            className="btn btn-secondary"
+            style={{ fontSize: '0.78rem', padding: '5px 12px' }}
+          >
+            <TrendingUp size={14} color="#f472b6" />
+            <span>Analytics & Badges</span>
+          </button>
+        </div>
+      )}
     </header>
   );
 }
-
-

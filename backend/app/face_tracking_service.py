@@ -1,4 +1,3 @@
-
 import cv2
 
 from app.models import EyeContactMetrics, FrameGazeSample
@@ -8,7 +7,7 @@ def is_eye_looking_center(iris_x: float, inner_x: float, outer_x: float) -> bool
     """
     Checks whether iris horizontal position is within the center zone
     between the inner and outer eye corners.
-    Ideal center zone is between 0.38 and 0.62.
+    Ideal center zone is between 0.36 and 0.64.
     """
     min_x = min(inner_x, outer_x)
     max_x = max(inner_x, outer_x)
@@ -21,7 +20,8 @@ def is_eye_looking_center(iris_x: float, inner_x: float, outer_x: float) -> bool
 
 def analyze_video_frames_mediapipe(video_path: str, sample_fps: float = 1.0) -> EyeContactMetrics:
     """
-    Extracts frames at ~1 FPS and analyzes eye contact/engagement using MediaPipe Face Mesh or OpenCV fallback.
+    Extracts frames at ~1 FPS and analyzes eye contact/engagement & head posture stability
+    using MediaPipe Face Mesh or OpenCV fallback.
     """
     cap = cv2.VideoCapture(video_path)
     if not cap.isOpened():
@@ -30,6 +30,8 @@ def analyze_video_frames_mediapipe(video_path: str, sample_fps: float = 1.0) -> 
             total_frames_analyzed=0,
             looking_at_camera_frames=0,
             timeline_sampled=[],
+            posture_score=80,
+            posture_status="No Video Detected",
             disclaimer="Could not open video file for face engagement analysis."
         )
 
@@ -70,6 +72,7 @@ def analyze_video_frames_mediapipe(video_path: str, sample_fps: float = 1.0) -> 
     frame_idx = 0
     total_analyzed = 0
     looking_count = 0
+    posture_stability_samples: list[float] = []
 
     while cap.isOpened():
         ret, frame = cap.read()
@@ -115,11 +118,11 @@ def analyze_video_frames_mediapipe(video_path: str, sample_fps: float = 1.0) -> 
                             if face_width > 0.05:
                                 sym_ratio = (nose_x - min(face_left, face_right)) / face_width
                                 face_centered = 0.35 <= sym_ratio <= 0.65
+                                posture_stability_samples.append(abs(sym_ratio - 0.5))
 
                             if (left_centered or right_centered) and face_centered:
                                 looking = True
                         else:
-                            # Face landmarks without iris refinement: check face orientation symmetry
                             nose_x = landmarks[1].x
                             face_left = landmarks[234].x
                             face_right = landmarks[454].x
@@ -128,21 +131,20 @@ def analyze_video_frames_mediapipe(video_path: str, sample_fps: float = 1.0) -> 
                                 sym_ratio = (nose_x - min(face_left, face_right)) / face_width
                                 if 0.38 <= sym_ratio <= 0.62:
                                     looking = True
+                                posture_stability_samples.append(abs(sym_ratio - 0.5))
                 except Exception as ex:
                     print(f"[Face Tracking] Error processing frame {frame_idx}: {ex}")
 
             elif face_cascade is not None and not face_cascade.empty():
-                # OpenCV Haar detection fallback
                 gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
                 faces = face_cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=4, minSize=(60, 60))
                 if len(faces) > 0:
                     (fx, fy, fw, fh) = faces[0]
-                    # Check if face is roughly centered in frame
                     face_center_x = fx + (fw / 2.0)
                     frame_center_x = w / 2.0
                     offset = abs(face_center_x - frame_center_x) / w
+                    posture_stability_samples.append(offset)
                     
-                    # Detect eyes within face region
                     roi_gray = gray[fy:fy + int(fh * 0.6), fx:fx + fw]
                     eyes = eye_cascade.detectMultiScale(roi_gray, scaleFactor=1.1, minNeighbors=3, minSize=(15, 15)) if eye_cascade else []
                     
@@ -169,10 +171,28 @@ def analyze_video_frames_mediapipe(video_path: str, sample_fps: float = 1.0) -> 
 
     pct = round((looking_count / total_analyzed) * 100.0, 1) if total_analyzed > 0 else 0.0
 
+    # Calculate posture score and status
+    posture_score = 88
+    if posture_stability_samples:
+        avg_deviation = sum(posture_stability_samples) / len(posture_stability_samples)
+        if avg_deviation < 0.08:
+            posture_score = 92
+            posture_status = "Centered & Stable"
+        elif avg_deviation < 0.16:
+            posture_score = 82
+            posture_status = "Slightly Off-Center"
+        else:
+            posture_score = 68
+            posture_status = "Frequent Head Movement"
+    else:
+        posture_status = "Centered & Stable"
+
     return EyeContactMetrics(
         eye_contact_percentage=pct,
         total_frames_analyzed=total_analyzed,
         looking_at_camera_frames=looking_count,
         timeline_sampled=timeline,
-        disclaimer="Eye contact is measured via facial landmark alignment as an engagement proxy metric."
+        posture_score=posture_score,
+        posture_status=posture_status,
+        disclaimer="Eye contact & head posture stability are measured via facial landmark alignment as an engagement proxy metric."
     )

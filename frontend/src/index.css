@@ -675,22 +675,45 @@ h1, h2, h3, h4, h5, h6 {
   pointer-events: none;
 }
 
-.auth-input-field {
+.auth-input-field,
+.auth-input,
+select.auth-input,
+input.auth-input,
+textarea.auth-input {
   width: 100%;
-  padding: 12px 14px 12px 42px;
-  background: rgba(10, 15, 28, 0.7);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 10px 14px;
+  background: rgba(15, 23, 42, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: var(--radius-md);
-  color: var(--text-primary);
-  font-size: 0.92rem;
+  color: #f8fafc !important;
+  font-size: 0.9rem;
   font-family: var(--font-body);
   transition: all var(--transition-fast);
   outline: none;
+  box-sizing: border-box;
 }
 
-.auth-input-field:focus {
+select, 
+select.auth-input,
+option {
+  color: #f8fafc !important;
+  background-color: #0f172a !important;
+}
+
+select option {
+  background-color: #0f172a !important;
+  color: #f8fafc !important;
+  padding: 8px 12px;
+}
+
+.auth-input-field:focus,
+.auth-input:focus,
+select.auth-input:focus,
+input.auth-input:focus,
+textarea.auth-input:focus {
   border-color: var(--primary);
-  background: rgba(15, 23, 42, 0.9);
+  background: rgba(15, 23, 42, 0.95);
+  color: #ffffff !important;
   box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.25), 0 0 20px rgba(99, 102, 241, 0.2);
 }
 
@@ -1010,6 +1033,43 @@ h1, h2, h3, h4, h5, h6 {
   background: linear-gradient(90deg, #10b981 0%, #f59e0b 70%, #f43f5e 100%);
   border-radius: 9999px;
   transition: width 80ms ease-out;
+}
+
+/* Pulse Warning Animation */
+@keyframes pulseWarning {
+  0%, 100% {
+    transform: scale(1);
+    filter: drop-shadow(0 0 4px #f59e0b);
+  }
+  50% {
+    transform: scale(1.08);
+    filter: drop-shadow(0 0 14px #f59e0b);
+  }
+}
+
+.pulse-warning {
+  animation: pulseWarning 1s infinite ease-in-out;
+}
+
+/* Print Media Styles for Downloadable PDF Reports */
+@media print {
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+  header, footer, .modal-overlay, button, .stats-bar-grid {
+    display: none !important;
+  }
+  .glass-card {
+    background: #ffffff !important;
+    color: #000000 !important;
+    border: 1px solid #cccccc !important;
+    box-shadow: none !important;
+  }
+  #printable-report, #printable-cheatsheet {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
 }
 
 

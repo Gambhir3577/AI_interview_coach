@@ -1,131 +1,37 @@
-# AI Interview Coach (MVP)
+# AI Interview Coach Pro 2.0
 
-A multimodal AI-powered web application that helps candidates practice mock interview questions with their webcam and microphone, producing an automated feedback report analyzing speech fluency, content quality, and eye contact.
-
----
-
-## Architecture & System Design Overview
-
-```
-+-----------------------------------------------------------------------------------+
-|                                 REACT FRONTEND                                    |
-|                                                                                   |
-|  [ Category Selection ]  --->  [ Recording Studio ]  --->  [ Comprehensive Report ]|
-|  - HR / Tech / Behavioral     - Live Webcam View           - Speech Quality Card  |
-|  - Random / Select Question   - Audio Meter + Timer        - Eye Contact Card     |
-|  - History Modal              - MediaRecorder WebM/MP4     - Content / STAR Card  |
-|                                                            - Transcript Viewer    |
-+------------------------------------------+----------------------------------------+
-                                           |
-                                           | POST /analyze (FormData: video, q_id)
-                                           v
-+-----------------------------------------------------------------------------------+
-|                                FASTAPI BACKEND                                    |
-|                                                                                   |
-|  1. Video Ingestion & Audio Track Extraction (FFmpeg / imageio-ffmpeg)            |
-|  2. Speech Transcription (Local Whisper `base` -> transcript + segments)          |
-|  3. Speech Metrics (Filler words per 100, WPM pace gauge, >3s pause detection)    |
-|  4. Eye Tracking (MediaPipe Face Mesh -> Iris landmark centering proxy %)         |
-|  5. AI Content Coach (Anthropic Claude structured JSON prompt + fallback)         |
-|  6. Database Persistence (SQLite session record + history retrieval)              |
-+-----------------------------------------------------------------------------------+
-```
-
-### Architectural Rationale & Design Trade-offs
-Rather than training custom neural networks from scratch for an MVP, this application deliberately employs **pretrained foundation models and targeted multimodal orchestration**:
-- **OpenAI Whisper (Local `base` model)**: Runs directly on-device without API latency, external dependencies, or recurring per-minute audio transcription costs.
-- **MediaPipe Face Mesh (On-Device Vision)**: Extracts 468+ facial & iris landmarks to compute real-time gaze alignment as an engagement proxy metric.
-- **Anthropic Claude (`claude-3-5-sonnet`)**: Leverages advanced reasoning to evaluate complex answer relevance, structural storytelling (STAR method), and actionable strengths & improvement tips.
-- **SQLite Database**: Lightweight, zero-config relational store for curated question banks and candidate session histories.
+A multimodal AI-powered web platform that helps candidates practice mock interview questions with their webcam and microphone, producing an automated feedback report analyzing multi-dimensional content rubrics (Structure, Clarity, Relevance, Depth), rewritten model answers, speaking pace, filler words, vocal confidence tone, and head posture/gaze stability.
 
 ---
 
-## Tech Stack
+## Key Features
 
-- **Backend**: Python 3.10+ / FastAPI, SQLAlchemy, Pydantic, Uvicorn
-- **Speech-to-Text**: OpenAI Whisper (Local `base` model)
-- **Audio Processing**: FFmpeg / `imageio-ffmpeg`, Pydub (Silence & pause detection)
-- **Computer Vision**: OpenCV, MediaPipe Face Mesh (Iris tracking)
-- **AI Content Feedback**: Anthropic Claude API (`claude-3-5-sonnet` / `claude-sonnet-4-6`)
-- **Frontend**: React 18, Vite, Canvas-Confetti, Lucide-React
-- **Styling**: Vanilla CSS Design System with dark-mode glassmorphism
+### 1. Core Practice Experience
+- **Role/Company-Specific Question Banks**: Software Engineering, Product Management, Data Science & ML, System Design, Behavioral, Growth/Marketing, and Finance across Junior, Mid, Senior, and Lead tiers.
+- **Company Style Presets**: Amazon (16 Leadership Principles), Google (Structured Problem Solving & Googleyness), Meta (Fast Impact), Apple (Craft), and McKinsey (MECE Case).
+- **Voice-Based Mock Interviews**: Built-in AI voice question narrator (Web Speech Synthesis) with real-time speech recognition.
+- **Dynamic Follow-Up Probing**: The AI interviewer asks adaptive, context-aware follow-up questions challenging candidate answers.
+- **Guided STAR Mode**: Real-time visual checkpoints for Situation (15%), Task (15%), Action (50%), and Result (20%).
+- **Timed Rounds**: Configurable 30s, 60s, 90s, 2m, 3m, and 5m high-pressure countdown timer modes with audio/visual warnings.
 
----
+### 2. Feedback & Analysis
+- **Multi-Dimensional Rubric Scoring**: Structure, Clarity, Relevance, and Technical/Domain Depth (0-10 scales + 0-100 composite index).
+- **Rewritten "Model Answer" Comparison**: Side-by-side comparison showing how the candidate's exact answer could be tightened and quantified.
+- **Filler Word Detection**: Comprehensive detection of `um`, `uh`, `like`, `you know`, `basically`, `actually`, `so`, `literally`, etc.
+- **Sentiment & Confidence Tone**: Vocal confidence score (0-100), hesitation rate per minute, and sentiment mood classification.
+- **Gaze & Head Posture Stability**: MediaPipe Face Mesh tracking iris alignment and head posture stability.
 
-## Project Structure
+### 3. Personalization & Motivation
+- **Resume & JD Auto-Question Generator**: Upload or paste Resume + Job Description to auto-generate 5 tailored questions.
+- **Candidate Analytics Dashboard**: Improvement trend lines, domain proficiency radar, weak-spot alerts, and adaptive level recommendations.
+- **Gamification & Badges**: Daily practice streaks 🔥, XP levels, and unlockable achievement badges.
+- **Downloadable Reports & Sharing**: PDF/HTML printable reports, JSON export, and shareable mentor review links.
 
-```
-AI_interview_coach/
-├── backend/
-│   ├── app/
-│   │   ├── __init__.py
-│   │   ├── main.py                  # FastAPI server & /analyze pipeline
-│   │   ├── models.py                # Pydantic data schemas
-│   │   ├── db.py                    # SQLite models & 30-question seed bank
-│   │   ├── whisper_service.py       # Audio extraction & local Whisper transcription
-│   │   ├── speech_metrics.py        # WPM, filler word regex & pause detection
-│   │   ├── face_tracking_service.py # MediaPipe Face Mesh & iris engagement tracking
-│   │   └── llm_service.py           # Anthropic Claude structured content evaluator
-│   └── requirements.txt
-├── frontend/
-│   ├── src/
-│   │   ├── components/
-│   │   │   ├── Header.jsx           # Top navigation & backend status indicator
-│   │   │   ├── CategorySelect.jsx   # Domain selector & question browser
-│   │   │   ├── RecordingScreen.jsx  # Webcam recording studio & audio meter
-│   │   │   ├── FeedbackReport.jsx   # Multimodal feedback dashboard & gauges
-│   │   │   ├── Gauges.jsx           # SVG speedometers & circular score meters
-│   │   │   └── HistoryModal.jsx     # Past practice session log & report reloader
-│   │   ├── App.jsx                  # Main React container & routing
-│   │   ├── index.css                # Glassmorphic dark design tokens
-│   │   └── main.jsx
-│   ├── package.json
-│   ├── vite.config.js
-│   └── index.html
-└── README.md
-```
-
----
-
-## Quickstart & Setup Guide
-
-### 1. Backend Setup
-
-```bash
-# Navigate to backend directory
-cd backend
-
-# Create and activate Python virtual environment
-python3 -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-
-# Install dependencies
-pip install -r requirements.txt
-
-# (Optional) Set your Anthropic API Key for live Claude evaluations
-# If not set, the app will use its built-in intelligent coach fallback evaluator
-export ANTHROPIC_API_KEY="sk-ant-api..."
-
-# Start FastAPI development server
-uvicorn app.main:app --reload --port 8000
-```
-
-The backend server will start at `http://localhost:8000`. You can test interactive API documentation at `http://localhost:8000/docs`.
-
-### 2. Frontend Setup
-
-```bash
-# Open a new terminal and navigate to frontend directory
-cd frontend
-
-# Install Node dependencies
-npm install
-
-# Start Vite dev server
-npm run dev
-```
-
-The React frontend will start at `http://localhost:5173`.
+### 4. Extra Utilities
+- **Salary Negotiation Practice Simulator**: Interactive roleplay with an AI hiring manager negotiating Base, Equity, and Bonus packages.
+- **Role-Specific Q&A Cheat Sheet Generator**: Generates top 10 anticipated questions, STAR framework blueprints, pitfalls, and printable checklists.
+- **Post-Interview Debrief**: Log real interview experiences, estimate pass probability %, diagnose risks, and draft custom thank-you emails.
+- **Multi-Language Support**: English, Español, Français, Deutsch, 中文, हिन्दी, 日本語, and Português.
 
 ---
 
@@ -134,26 +40,39 @@ The React frontend will start at `http://localhost:5173`.
 | Method | Endpoint | Description |
 |---|---|---|
 | `GET` | `/health` | Server & model health status |
-| `GET` | `/questions?category={hr\|technical\|behavioral}` | Returns random question from domain |
-| `GET` | `/questions/all` | Returns all 30 curated questions in database |
+| `GET` | `/questions?role={role}&difficulty={tier}&company_preset={preset}` | Returns filtered random question |
+| `GET` | `/questions/all` | Returns all questions in the bank |
 | `POST` | `/analyze` | Ingests video recording (`multipart/form-data`) + question ID, returns full report |
 | `GET` | `/history` | Returns summary list of past practice sessions |
 | `GET` | `/history/{session_id}` | Retrieves full feedback report for a past session |
+| `POST` | `/interview/follow-up` | Generates dynamic interviewer follow-up probe |
+| `POST` | `/interview/generate-from-jd` | Auto-generates tailored questions from Resume and JD |
+| `POST` | `/negotiation/chat` | Simulates interactive salary counteroffer turns |
+| `POST` | `/cheatsheet/generate` | Generates role-specific Q&A cheat sheet |
+| `POST` | `/debrief/analyze` | Analyzes candidate real interview notes & drafts thank you email |
+| `GET` | `/analytics/trends` | Returns score trends over time, weak-spot radar, and proficiencies |
+| `GET` | `/gamification/profile` | Returns streaks, XP, level, and unlocked badges |
+| `GET` | `/share/{session_id}` | Retrieves session for peer/mentor review |
+| `POST` | `/share/{session_id}/review` | Submits mentor scorecard evaluation |
 
 ---
 
-## Feedback Metrics Explained
+## Quickstart Guide
 
-1. **Speaking Pace (WPM)**:
-   - Target range: **120 – 160 WPM**.
-   - Faster than 160 WPM is flagged as slightly/too fast; under 120 WPM is flagged as slightly/too slow.
-2. **Filler Words**:
-   - Scans for `["um", "uh", "like", "you know", "basically", "actually", "so", "i mean", "kind of", "sort of", "right"]`.
-   - Computes filler occurrences per 100 words and highlights them in the spoken transcript.
-3. **Pauses & Fluency**:
-   - Detects audio silences > 3.0 seconds to help candidates identify unnatural hesitations.
-4. **Eye Contact & Engagement**:
-   - Uses MediaPipe Face Mesh to calculate the percentage of time the candidate looked into the camera.
-   - *Note: Clearly labeled as an engagement/eye-contact proxy metric, not emotion detection.*
-5. **Content Quality & STAR Method**:
-   - Evaluates relevance (1-10), structure (1-10), STAR method adherence, strengths, and actionable improvement points.
+### 1. Backend Setup
+```bash
+cd backend
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+uvicorn app.main:app --port 8000
+```
+
+### 2. Frontend Setup
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+Visit `http://localhost:5173`.

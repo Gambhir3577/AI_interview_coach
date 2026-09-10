@@ -1,53 +1,55 @@
 import React from 'react';
 
 /**
- * Circular Score Gauge with glowing SVG stroke
+ * Animated Circular Score Gauge
  */
 export function CircularScoreGauge({
-  value,
+  value = 75,
   max = 100,
-  size = 120,
+  size = 140,
   strokeWidth = 10,
-  label = 'Score',
   color = '#6366f1',
   unit = '',
+  label = '',
   sublabel = ''
 }) {
   const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
-  const normalizedValue = Math.min(Math.max(value || 0, 0), max);
-  const strokeDashoffset = circumference - (normalizedValue / max) * circumference;
+  const clampedValue = Math.min(max, Math.max(0, value));
+  const strokeDashoffset = circumference - (clampedValue / max) * circumference;
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
       <div style={{ position: 'relative', width: size, height: size }}>
         <svg width={size} height={size} style={{ transform: 'rotate(-90deg)' }}>
-          {/* Background circle */}
+          {/* Background Track */}
           <circle
             cx={size / 2}
             cy={size / 2}
             r={radius}
+            fill="transparent"
             stroke="rgba(255, 255, 255, 0.08)"
             strokeWidth={strokeWidth}
-            fill="transparent"
           />
-          {/* Progress circle */}
+          {/* Animated Value Arc */}
           <circle
             cx={size / 2}
             cy={size / 2}
             r={radius}
+            fill="transparent"
             stroke={color}
             strokeWidth={strokeWidth}
             strokeDasharray={circumference}
             strokeDashoffset={strokeDashoffset}
             strokeLinecap="round"
-            fill="transparent"
             style={{
-              transition: 'stroke-dashoffset 1s cubic-bezier(0.4, 0, 0.2, 1)',
+              transition: 'stroke-dashoffset 1.2s cubic-bezier(0.34, 1.56, 0.64, 1)',
               filter: `drop-shadow(0 0 6px ${color}80)`
             }}
           />
         </svg>
+
+        {/* Center Text */}
         <div
           style={{
             position: 'absolute',
@@ -59,21 +61,23 @@ export function CircularScoreGauge({
             flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center',
+            textAlign: 'center'
           }}
         >
-          <span style={{ fontSize: size * 0.24, fontWeight: 800, fontFamily: 'var(--font-heading)', color: '#f8fafc' }}>
-            {value}
-            <span style={{ fontSize: size * 0.14, color: 'var(--text-secondary)' }}>{unit}</span>
-          </span>
+          <div style={{ fontSize: size > 110 ? '1.8rem' : '1.3rem', fontWeight: 800, color: '#ffffff', lineHeight: 1 }}>
+            {clampedValue}
+            <span style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-secondary)' }}>{unit}</span>
+          </div>
           {sublabel && (
-            <span style={{ fontSize: size * 0.1, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+            <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '2px' }}>
               {sublabel}
-            </span>
+            </div>
           )}
         </div>
       </div>
+
       {label && (
-        <span style={{ marginTop: 8, fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-secondary)' }}>
+        <span style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', fontWeight: 600, textAlign: 'center' }}>
           {label}
         </span>
       )}
@@ -81,133 +85,250 @@ export function CircularScoreGauge({
   );
 }
 
-
 /**
- * Speedometer Gauge for Speaking Pace (WPM)
+ * Visual WPM Speedometer
  */
-export function WpmSpeedometer({ wpm = 0, status = 'Ideal Pace' }) {
-  // Speedometer ranges from 0 to 220 WPM
-  const minWpm = 0;
+export function WpmSpeedometer({ wpm = 135, status = 'Ideal Pace' }) {
+  const minWpm = 60;
   const maxWpm = 220;
-  const clampedWpm = Math.min(Math.max(wpm, minWpm), maxWpm);
+  const clampedWpm = Math.max(minWpm, Math.min(maxWpm, wpm));
+  const normalized = (clampedWpm - minWpm) / (maxWpm - minWpm);
+  const angle = -90 + normalized * 180; // -90 deg (left) to +90 deg (right)
 
-  // Map 0 -> 220 WPM to angle -90deg to +90deg (180 deg total)
-  const angle = -90 + (clampedWpm / maxWpm) * 180;
-
-  // Determine status color
-  let statusColor = '#10b981'; // green
-  if (status.includes('Slow')) statusColor = '#f59e0b';
-  if (status.includes('Too Fast') || status.includes('Too Slow')) statusColor = '#f43f5e';
-  if (status.includes('Fast') && !status.includes('Too')) statusColor = '#f59e0b';
+  let needleColor = '#34d399';
+  if (wpm < 110 || wpm > 180) {
+    needleColor = '#f43f5e';
+  } else if (wpm < 120 || wpm > 160) {
+    needleColor = '#fbbf24';
+  }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-      <div style={{ position: 'relative', width: 220, height: 125, overflow: 'hidden' }}>
-        <svg width="220" height="220" viewBox="0 0 220 220" style={{ position: 'absolute', top: 0, left: 0 }}>
-          <defs>
-            <linearGradient id="speedGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stopColor="#f43f5e" />     {/* Too Slow */}
-              <stop offset="45%" stopColor="#f59e0b" />    {/* Slightly Slow */}
-              <stop offset="55%" stopColor="#10b981" />    {/* Ideal */}
-              <stop offset="75%" stopColor="#10b981" />    {/* Ideal */}
-              <stop offset="85%" stopColor="#f59e0b" />    {/* Slightly Fast */}
-              <stop offset="100%" stopColor="#f43f5e" />   {/* Too Fast */}
-            </linearGradient>
-          </defs>
-
-          {/* Background Arc */}
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%', maxWidth: '240px' }}>
+      <div style={{ position: 'relative', width: 180, height: 95, overflow: 'hidden' }}>
+        <svg width="180" height="180" viewBox="0 0 180 180" style={{ position: 'absolute', top: 0, left: 0 }}>
+          {/* Slow Zone (60 - 120) */}
           <path
-            d="M 25 110 A 85 85 0 0 1 195 110"
+            d="M 20 90 A 70 70 0 0 1 55 35"
             fill="none"
-            stroke="rgba(255, 255, 255, 0.08)"
-            strokeWidth="16"
-            strokeLinecap="round"
+            stroke="#f59e0b"
+            strokeWidth="10"
+            strokeOpacity="0.4"
           />
-
-          {/* Color Gradient Track */}
+          {/* Ideal Zone (120 - 160) */}
           <path
-            d="M 25 110 A 85 85 0 0 1 195 110"
+            d="M 55 35 A 70 70 0 0 1 125 35"
             fill="none"
-            stroke="url(#speedGrad)"
+            stroke="#10b981"
             strokeWidth="12"
-            strokeLinecap="round"
-            style={{ opacity: 0.85 }}
+            strokeOpacity="0.9"
+            style={{ filter: 'drop-shadow(0 0 6px rgba(16, 185, 129, 0.4))' }}
           />
-
-          {/* Ideal Range Highlight Marker (120 - 160 WPM: approx 54% to 72% of 180deg) */}
+          {/* Fast Zone (160 - 220) */}
           <path
-            d="M 90 30 A 85 85 0 0 1 140 37"
+            d="M 125 35 A 70 70 0 0 1 160 90"
             fill="none"
-            stroke="#34d399"
-            strokeWidth="4"
-            style={{ filter: 'drop-shadow(0 0 4px #10b981)' }}
+            stroke="#f43f5e"
+            strokeWidth="10"
+            strokeOpacity="0.4"
           />
-
-          {/* Needle */}
-          <g style={{ transform: `rotate(${angle}deg)`, transformOrigin: '110px 110px', transition: 'transform 1s cubic-bezier(0.34, 1.56, 0.64, 1)' }}>
-            <line
-              x1="110"
-              y1="110"
-              x2="110"
-              y2="36"
-              stroke="#f8fafc"
-              strokeWidth="3.5"
-              strokeLinecap="round"
-              style={{ filter: 'drop-shadow(0 0 4px rgba(255,255,255,0.8))' }}
-            />
-            <circle cx="110" cy="110" r="7" fill="#6366f1" stroke="#f8fafc" strokeWidth="2" />
-          </g>
         </svg>
+
+        {/* Pivot Pin */}
+        <div
+          style={{
+            position: 'absolute',
+            bottom: 0,
+            left: '50%',
+            transform: 'translateX(-50%)',
+            width: 14,
+            height: 14,
+            borderRadius: '50%',
+            backgroundColor: '#ffffff',
+            boxShadow: '0 0 8px rgba(255, 255, 255, 0.5)',
+            zIndex: 3
+          }}
+        />
+
+        {/* Needle */}
+        <div
+          style={{
+            position: 'absolute',
+            bottom: 7,
+            left: '50%',
+            width: 3,
+            height: 60,
+            backgroundColor: needleColor,
+            borderRadius: '2px',
+            transformOrigin: 'bottom center',
+            transform: `translateX(-50%) rotate(${angle}deg)`,
+            transition: 'transform 1s cubic-bezier(0.34, 1.56, 0.64, 1)',
+            boxShadow: `0 0 8px ${needleColor}`,
+            zIndex: 2
+          }}
+        />
       </div>
 
-      <div style={{ textAlign: 'center', marginTop: -5 }}>
-        <div style={{ fontSize: '1.8rem', fontWeight: 800, fontFamily: 'var(--font-heading)', color: '#f8fafc' }}>
-          {wpm} <span style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', fontWeight: 500 }}>WPM</span>
+      <div style={{ textAlign: 'center', marginTop: '6px' }}>
+        <div style={{ fontSize: '1.4rem', fontWeight: 800, color: '#ffffff', fontFamily: 'var(--font-mono)' }}>
+          {wpm} <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>WPM</span>
         </div>
         <div
           style={{
-            display: 'inline-block',
-            marginTop: 4,
-            padding: '3px 12px',
-            borderRadius: '9999px',
-            fontSize: '0.78rem',
+            fontSize: '0.75rem',
             fontWeight: 700,
+            color: needleColor,
+            marginTop: '2px',
             textTransform: 'uppercase',
-            letterSpacing: '0.04em',
-            backgroundColor: `${statusColor}20`,
-            color: statusColor,
-            border: `1px solid ${statusColor}40`
+            letterSpacing: '0.05em'
           }}
         >
           {status}
-        </div>
-        <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: 4 }}>
-          Target: 120 – 160 WPM
         </div>
       </div>
     </div>
   );
 }
 
-
 /**
- * Eye Contact Timeline Visualization Bar
+ * Pressure Round Countdown Timer Dial
  */
-export function EngagementTimeline({ timeline = [] }) {
-  if (!timeline || timeline.length === 0) return null;
+export function PressureTimerDial({
+  timeLeftSeconds = 60,
+  totalLimitSeconds = 90
+}) {
+  const size = 90;
+  const strokeWidth = 7;
+  const radius = (size - strokeWidth) / 2;
+  const circumference = 2 * Math.PI * radius;
+  const ratio = Math.max(0, Math.min(1, timeLeftSeconds / (totalLimitSeconds || 90)));
+  const offset = circumference - ratio * circumference;
+
+  const isWarning = timeLeftSeconds <= 15 && timeLeftSeconds > 0;
+  const isOvertime = timeLeftSeconds <= 0;
+
+  const color = isOvertime ? '#f43f5e' : isWarning ? '#f59e0b' : '#6366f1';
 
   return (
-    <div style={{ width: '100%', marginTop: 12 }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: 4 }}>
-        <span>0s (Start)</span>
-        <span>Timeline Engagement Sample</span>
-        <span>{timeline[timeline.length - 1]?.timestamp_sec || 0}s (End)</span>
+    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+      <div style={{ position: 'relative', width: size, height: size }}>
+        <svg width={size} height={size} style={{ transform: 'rotate(-90deg)' }}>
+          <circle
+            cx={size / 2}
+            cy={size / 2}
+            r={radius}
+            fill="transparent"
+            stroke="rgba(255, 255, 255, 0.1)"
+            strokeWidth={strokeWidth}
+          />
+          <circle
+            cx={size / 2}
+            cy={size / 2}
+            r={radius}
+            fill="transparent"
+            stroke={color}
+            strokeWidth={strokeWidth}
+            strokeDasharray={circumference}
+            strokeDashoffset={offset}
+            strokeLinecap="round"
+            style={{
+              transition: 'stroke-dashoffset 0.5s ease, stroke 0.3s ease',
+              filter: `drop-shadow(0 0 6px ${color}80)`
+            }}
+          />
+        </svg>
+
+        <div
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}
+          className={isWarning ? 'pulse-warning' : ''}
+        >
+          <span style={{ fontSize: '1.05rem', fontWeight: 800, color: '#ffffff', fontFamily: 'var(--font-mono)' }}>
+            {Math.max(0, timeLeftSeconds)}s
+          </span>
+          <span style={{ fontSize: '0.62rem', color: isWarning ? '#fbbf24' : 'var(--text-muted)' }}>
+            {isOvertime ? 'OVERTIME' : isWarning ? 'WRAPPING' : 'REMAINING'}
+          </span>
+        </div>
       </div>
+    </div>
+  );
+}
+
+/**
+ * 4-Pillar Content Radar Breakdown Bar
+ */
+export function ContentDimensionPillars({
+  relevance = 8,
+  structure = 8,
+  clarity = 7,
+  depth = 7
+}) {
+  const pillars = [
+    { label: 'Relevance', score: relevance, color: '#818cf8' },
+    { label: 'Structure', score: structure, color: '#c084fc' },
+    { label: 'Clarity', score: clarity, color: '#38bdf8' },
+    { label: 'Tech/Domain Depth', score: depth, color: '#34d399' },
+  ];
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', width: '100%' }}>
+      {pillars.map((p) => (
+        <div key={p.label}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', marginBottom: '3px' }}>
+            <span style={{ color: 'var(--text-secondary)', fontWeight: 600 }}>{p.label}</span>
+            <span style={{ color: p.color, fontWeight: 700 }}>{p.score} / 10</span>
+          </div>
+          <div style={{ width: '100%', height: 6, background: 'rgba(255, 255, 255, 0.08)', borderRadius: 4, overflow: 'hidden' }}>
+            <div
+              style={{
+                width: `${(p.score / 10) * 100}%`,
+                height: '100%',
+                background: p.color,
+                borderRadius: 4,
+                transition: 'width 0.8s ease'
+              }}
+            />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/**
+ * Sampled Gaze & Posture Timeline
+ */
+export function EngagementTimeline({ timeline = [] }) {
+  if (!timeline || timeline.length === 0) {
+    return (
+      <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', textAlign: 'center', padding: '10px 0' }}>
+        No timeline sampled data available.
+      </div>
+    );
+  }
+
+  return (
+    <div>
+      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.72rem', color: 'var(--text-muted)', marginBottom: '4px' }}>
+        <span>0:00</span>
+        <span style={{ color: 'var(--text-secondary)', fontWeight: 600 }}>Gaze & Posture Timeline</span>
+        <span>End</span>
+      </div>
+
       <div
         style={{
           display: 'flex',
           height: 14,
-          borderRadius: 6,
+          borderRadius: '4px',
           overflow: 'hidden',
           background: 'rgba(255, 255, 255, 0.05)',
           border: '1px solid var(--border-subtle)',
@@ -217,25 +338,25 @@ export function EngagementTimeline({ timeline = [] }) {
         {timeline.map((sample, idx) => (
           <div
             key={idx}
-            title={`${sample.timestamp_sec}s: ${sample.looking_at_camera ? 'Looking at camera' : 'Looked away'}`}
             style={{
               flex: 1,
               backgroundColor: sample.looking_at_camera ? '#10b981' : '#f43f5e',
-              opacity: sample.looking_at_camera ? 0.9 : 0.6,
-              transition: 'all 0.2s ease',
-              cursor: 'pointer'
+              opacity: sample.looking_at_camera ? 0.85 : 0.65,
+              transition: 'all 0.15s ease'
             }}
+            title={`${sample.timestamp_sec}s: ${sample.looking_at_camera ? 'Looking at camera' : 'Averted gaze / Shifted'}`}
           />
         ))}
       </div>
-      <div style={{ display: 'flex', gap: 16, marginTop: 6, fontSize: '0.72rem', color: 'var(--text-secondary)' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-          <span style={{ width: 8, height: 8, borderRadius: 2, background: '#10b981' }} />
-          <span>Looking at camera</span>
+
+      <div style={{ display: 'flex', justifyContent: 'center', gap: '16px', marginTop: '6px', fontSize: '0.7rem', color: 'var(--text-muted)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+          <span style={{ width: 8, height: 8, borderRadius: '2px', backgroundColor: '#10b981' }} />
+          <span>Camera Aligned</span>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-          <span style={{ width: 8, height: 8, borderRadius: 2, background: '#f43f5e' }} />
-          <span>Looked away</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+          <span style={{ width: 8, height: 8, borderRadius: '2px', backgroundColor: '#f43f5e' }} />
+          <span>Averted Gaze</span>
         </div>
       </div>
     </div>
