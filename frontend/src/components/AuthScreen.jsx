@@ -78,6 +78,22 @@ export function AuthScreen({ onLoginSuccess }) {
     }, 600);
   };
 
+  const handleInstantStart = (trackId = selectedTrack) => {
+    setIsLoading(true);
+    setTimeout(() => {
+      setIsLoading(false);
+      const demoUser = {
+        name: 'Candidate Alex',
+        email: 'alex.candidate@example.com',
+        track: trackId,
+        isGuest: true,
+        joinedAt: new Date().toISOString()
+      };
+      triggerCelebration();
+      onLoginSuccess(demoUser, { autoStart: true, track: trackId });
+    }, 300);
+  };
+
   const handleGuestDemo = () => {
     setIsLoading(true);
     setTimeout(() => {
@@ -131,9 +147,78 @@ export function AuthScreen({ onLoginSuccess }) {
               <span className="gradient-text">Real-Time Multimodal AI</span>
             </h2>
 
-            <p style={{ color: 'var(--text-secondary)', fontSize: '0.92rem', lineHeight: 1.6 }}>
+            <p style={{ color: 'var(--text-secondary)', fontSize: '0.92rem', lineHeight: 1.6, marginBottom: '20px' }}>
               Experience instant on-device speech fluency metrics, iris gaze alignment tracking, and structured STAR feedback powered by Anthropic Claude & OpenAI Whisper.
             </p>
+
+            {/* Instant Start Interview Callout in Hero */}
+            <div
+              style={{
+                padding: '16px',
+                background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.2) 0%, rgba(236, 72, 153, 0.15) 100%)',
+                border: '1px solid rgba(99, 102, 241, 0.4)',
+                borderRadius: '14px',
+                marginBottom: '20px'
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
+                <span style={{ fontSize: '0.78rem', fontWeight: 800, color: '#f8fafc', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                  ⚡ Quick Start • No Sign Up Required
+                </span>
+                <span className="badge badge-success" style={{ fontSize: '0.68rem' }}>Instant Launch</span>
+              </div>
+
+              {/* Career Track Quick Selector */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '8px', marginBottom: '12px' }}>
+                {CAREER_TRACKS.map((track) => {
+                  const Icon = track.icon;
+                  const isSelected = selectedTrack === track.id;
+                  return (
+                    <button
+                      key={track.id}
+                      type="button"
+                      onClick={() => setSelectedTrack(track.id)}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        padding: '8px 10px',
+                        borderRadius: '8px',
+                        border: isSelected ? `1px solid ${track.color}` : '1px solid rgba(255, 255, 255, 0.1)',
+                        background: isSelected ? 'rgba(99, 102, 241, 0.3)' : 'rgba(0, 0, 0, 0.25)',
+                        color: isSelected ? '#ffffff' : 'var(--text-secondary)',
+                        fontSize: '0.78rem',
+                        fontWeight: 600,
+                        cursor: 'pointer',
+                        textAlign: 'left'
+                      }}
+                    >
+                      <Icon size={14} color={track.color} />
+                      <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{track.label}</span>
+                    </button>
+                  );
+                })}
+              </div>
+
+              <button
+                type="button"
+                onClick={() => handleInstantStart(selectedTrack)}
+                disabled={isLoading}
+                className="btn btn-primary"
+                style={{
+                  width: '100%',
+                  padding: '12px 18px',
+                  background: 'linear-gradient(135deg, #f43f5e 0%, #ec4899 50%, #6366f1 100%)',
+                  boxShadow: '0 4px 20px rgba(244, 63, 94, 0.45)',
+                  fontSize: '0.95rem',
+                  fontWeight: 700
+                }}
+              >
+                <Zap size={18} />
+                <span>Start Mock Interview Now</span>
+                <ArrowRight size={18} />
+              </button>
+            </div>
           </div>
 
           {/* Animated AI HUD Interactive Widget */}
@@ -373,21 +458,44 @@ export function AuthScreen({ onLoginSuccess }) {
               display: 'flex',
               alignItems: 'center',
               gap: '12px',
-              margin: '20px 0 8px',
+              margin: '20px 0 12px',
               color: 'var(--text-muted)',
               fontSize: '0.78rem'
             }}
           >
             <div style={{ flex: 1, height: '1px', background: 'var(--border-subtle)' }} />
-            <span>OR TRY INSTANTLY</span>
+            <span>OR INSTANT PRACTICE</span>
             <div style={{ flex: 1, height: '1px', background: 'var(--border-subtle)' }} />
           </div>
 
-          {/* Instant 1-Click Guest Demo Button */}
-          <button type="button" onClick={handleGuestDemo} className="guest-access-btn" disabled={isLoading}>
-            <Zap size={16} color="#f59e0b" />
-            <span>Instant One-Click Guest Demo</span>
-          </button>
+          {/* Instant Start Interview Direct Action */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <button
+              type="button"
+              onClick={() => handleInstantStart(selectedTrack)}
+              className="guest-access-btn"
+              style={{
+                background: 'linear-gradient(135deg, rgba(244, 63, 94, 0.15) 0%, rgba(99, 102, 241, 0.2) 100%)',
+                border: '1px solid rgba(244, 63, 94, 0.4)',
+                color: '#ffffff',
+                fontWeight: 700
+              }}
+              disabled={isLoading}
+            >
+              <Zap size={16} color="#f43f5e" />
+              <span>Start Interview Now (Instant Mode)</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={handleGuestDemo}
+              className="btn btn-secondary"
+              style={{ fontSize: '0.8rem', padding: '8px 12px', width: '100%' }}
+              disabled={isLoading}
+            >
+              <span>Browse Question Bank as Guest</span>
+            </button>
+          </div>
 
           <p style={{ textAlign: 'center', fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '20px' }}>
             Protected by multimodal local analysis &bull; No credit card required

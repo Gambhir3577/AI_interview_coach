@@ -20,6 +20,7 @@ import { LANGUAGES } from '../i18n.js';
 export function Header({
   currentScreen,
   onNavigate,
+  onStartInterview,
   onOpenHistory,
   onOpenProfileSettings,
   onOpenResumeJD,
@@ -221,6 +222,22 @@ export function Header({
             />
             <span>{backendStatus === 'connected' ? 'AI Ready' : 'Connecting...'}</span>
           </div>
+
+          {/* Quick Start Interview Header Action */}
+          <button
+            onClick={() => onStartInterview && onStartInterview()}
+            className="btn btn-primary"
+            style={{
+              fontSize: '0.8rem',
+              padding: '6px 14px',
+              background: 'linear-gradient(135deg, #f43f5e 0%, #ec4899 50%, #6366f1 100%)',
+              boxShadow: '0 2px 12px rgba(244, 63, 94, 0.4)',
+              fontWeight: 700
+            }}
+          >
+            <Mic size={14} />
+            <span>Start Interview</span>
+          </button>
 
           {/* History Drawer Button */}
           {user && (

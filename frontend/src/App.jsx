@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Header } from './components/Header.jsx';
 import { AuthScreen } from './components/AuthScreen.jsx';
-import { CategorySelect } from './components/CategorySelect.jsx';
+import { CategorySelect, DEFAULT_TRACK_QUESTIONS } from './components/CategorySelect.jsx';
 import { RecordingScreen } from './components/RecordingScreen.jsx';
 import { FeedbackReport } from './components/FeedbackReport.jsx';
 import { HistoryModal } from './components/HistoryModal.jsx';
@@ -51,12 +51,48 @@ export default function App() {
     }
   }, [user]);
 
-  const handleLoginSuccess = (userProfile) => {
+  const handleLoginSuccess = (userProfile, options = {}) => {
     setUser(userProfile);
     try {
       localStorage.setItem('ai_coach_user', JSON.stringify(userProfile));
     } catch (e) {}
-    setCurrentScreen('category');
+
+    if (options.autoStart) {
+      const trackId = options.track || userProfile.track || 'swe';
+      const question = DEFAULT_TRACK_QUESTIONS[trackId] || DEFAULT_TRACK_QUESTIONS['swe'];
+      setSelectedQuestion({
+        ...question,
+        practiceMode: 'voice_multiturn',
+        timerLimit: 90
+      });
+      setCurrentScreen('recording');
+    } else {
+      setCurrentScreen('category');
+    }
+  };
+
+  const handleHeaderStartInterview = () => {
+    if (!user) {
+      const demoUser = {
+        name: 'Candidate Alex',
+        email: 'alex.candidate@example.com',
+        track: 'swe',
+        isGuest: true,
+        joinedAt: new Date().toISOString()
+      };
+      handleLoginSuccess(demoUser, { autoStart: true, track: 'swe' });
+    } else {
+      if (!selectedQuestion) {
+        const trackId = user.track || 'swe';
+        const question = DEFAULT_TRACK_QUESTIONS[trackId] || DEFAULT_TRACK_QUESTIONS['swe'];
+        setSelectedQuestion({
+          ...question,
+          practiceMode: 'voice_multiturn',
+          timerLimit: 90
+        });
+      }
+      setCurrentScreen('recording');
+    }
   };
 
   const handleUpdateUser = (updatedProfile) => {
@@ -108,6 +144,7 @@ export default function App() {
       <Header
         currentScreen={currentScreen}
         onNavigate={(screen) => setCurrentScreen(screen)}
+        onStartInterview={handleHeaderStartInterview}
         onOpenHistory={() => setIsHistoryOpen(true)}
         onOpenProfileSettings={() => setIsProfileSettingsOpen(true)}
         onOpenResumeJD={() => setIsResumeJDOpen(true)}

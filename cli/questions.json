@@ -1,0 +1,132 @@
+{
+  "questions": [
+    {
+      "id": "hr_easy_1",
+      "domain": "HR",
+      "difficulty": "Easy",
+      "question_text": "Tell me about yourself and why you are interested in this position.",
+      "expected_keywords": ["experience", "background", "passionate", "skills", "growth", "interest", "role", "team"],
+      "follow_up_question": "What specific aspect of our company culture or mission resonates most with you?"
+    },
+    {
+      "id": "hr_easy_2",
+      "domain": "HR",
+      "difficulty": "Easy",
+      "question_text": "What are your greatest professional strengths and one area you are working to improve?",
+      "expected_keywords": ["strength", "improve", "learning", "growth", "communication", "skills", "feedback", "adapt"],
+      "follow_up_question": "Can you give a recent example where you actively applied feedback to improve that area?"
+    },
+    {
+      "id": "hr_medium_1",
+      "domain": "HR",
+      "difficulty": "Medium",
+      "question_text": "Where do you see yourself professionally in the next three to five years?",
+      "expected_keywords": ["goals", "growth", "leadership", "skills", "mentor", "impact", "learning", "trajectory"],
+      "follow_up_question": "How does this specific role help you achieve that long-term career milestone?"
+    },
+    {
+      "id": "hr_medium_2",
+      "domain": "HR",
+      "difficulty": "Medium",
+      "question_text": "How do you maintain a healthy work-life balance and handle high-pressure deadlines?",
+      "expected_keywords": ["prioritize", "boundaries", "time management", "focus", "stress", "planning", "communicate", "delegation"],
+      "follow_up_question": "What tools or daily habits do you use to stay organized when priorities shift abruptly?"
+    },
+    {
+      "id": "hr_hard_1",
+      "domain": "HR",
+      "difficulty": "Hard",
+      "question_text": "Why should we hire you over other qualified candidates applying for this role?",
+      "expected_keywords": ["unique", "value", "impact", "track record", "deliver", "drive", "culture", "results"],
+      "follow_up_question": "What is the single biggest value you expect to deliver within your first 90 days?"
+    },
+    {
+      "id": "tech_easy_1",
+      "domain": "Technical",
+      "difficulty": "Easy",
+      "question_text": "What is the difference between synchronous and asynchronous programming, and when would you use each?",
+      "expected_keywords": ["blocking", "non-blocking", "event loop", "threads", "performance", "io", "latency", "async", "await"],
+      "follow_up_question": "How do you handle error propagation in asynchronous workflows?"
+    },
+    {
+      "id": "tech_easy_2",
+      "domain": "Technical",
+      "difficulty": "Easy",
+      "question_text": "Explain the concept of REST APIs and the significance of HTTP status codes like 200, 404, and 500.",
+      "expected_keywords": ["stateless", "http", "endpoints", "get", "post", "status code", "client", "server", "json"],
+      "follow_up_question": "What is the difference between PUT and PATCH in RESTful resource mutation?"
+    },
+    {
+      "id": "tech_medium_1",
+      "domain": "Technical",
+      "difficulty": "Medium",
+      "question_text": "Explain how database indexing works and the trade-offs between read and write performance.",
+      "expected_keywords": ["b-tree", "lookup", "speed", "write overhead", "storage", "query", "scan", "primary key", "index"],
+      "follow_up_question": "When would adding an index actually degrade overall database performance?"
+    },
+    {
+      "id": "tech_medium_2",
+      "domain": "Technical",
+      "difficulty": "Medium",
+      "question_text": "What are the core principles of Object-Oriented Programming (OOP) and how do you apply SOLID design principles?",
+      "expected_keywords": ["encapsulation", "inheritance", "polymorphism", "abstraction", "single responsibility", "decoupling", "interfaces"],
+      "follow_up_question": "Can you explain the Dependency Inversion Principle with a real-world software example?"
+    },
+    {
+      "id": "tech_hard_1",
+      "domain": "Technical",
+      "difficulty": "Hard",
+      "question_text": "How would you design a distributed caching layer to prevent cache stampede and ensure high availability?",
+      "expected_keywords": ["redis", "ttl", "mutex", "eviction", "replication", "consistency", "sharding", "lru", "stampede"],
+      "follow_up_question": "How would you handle cache invalidation during a multi-region database write?"
+    },
+    {
+      "id": "tech_hard_2",
+      "domain": "Technical",
+      "difficulty": "Hard",
+      "question_text": "Describe how you approach troubleshooting a sudden memory leak in a production backend microservice.",
+      "expected_keywords": ["profiling", "heap dump", "metrics", "garbage collection", "memory", "diagnostics", "logs", "isolation"],
+      "follow_up_question": "What alerting thresholds would you configure to detect memory degradation before out-of-memory crashes occur?"
+    },
+    {
+      "id": "beh_easy_1",
+      "domain": "Behavioral",
+      "difficulty": "Easy",
+      "question_text": "Tell me about a time you collaborated with a challenging teammate. How did you handle it?",
+      "expected_keywords": ["communication", "listen", "empathy", "conflict", "collaborate", "resolution", "outcome", "team"],
+      "follow_up_question": "What did you learn about your own interpersonal style from that interaction?"
+    },
+    {
+      "id": "beh_easy_2",
+      "domain": "Behavioral",
+      "difficulty": "Easy",
+      "question_text": "Describe a project where you had to quickly learn a new technology or skill to deliver results.",
+      "expected_keywords": ["adapt", "learn", "documentation", "curiosity", "deliver", "practice", "overcome", "success"],
+      "follow_up_question": "How did you validate that your implementation met best practices despite being new to the tool?"
+    },
+    {
+      "id": "beh_medium_1",
+      "domain": "Behavioral",
+      "difficulty": "Medium",
+      "question_text": "Tell me about a time a project you were leading did not go as planned. How did you respond?",
+      "expected_keywords": ["pivot", "ownership", "solution", "root cause", "post-mortem", "stakeholders", "deliver", "learned"],
+      "follow_up_question": "How did you communicate the roadblock to leadership or affected stakeholders?"
+    },
+    {
+      "id": "beh_medium_2",
+      "domain": "Behavioral",
+      "difficulty": "Medium",
+      "question_text": "Describe a situation where you had to make an important technical or business decision with incomplete information.",
+      "expected_keywords": ["trade-offs", "assumptions", "risk", "data", "actionable", "velocity", "stakeholders", "outcome"],
+      "follow_up_question": "If you had to make that same decision today with more experience, what would you do differently?"
+    },
+    {
+      "id": "beh_hard_1",
+      "domain": "Behavioral",
+      "difficulty": "Hard",
+      "question_text": "Tell me about a time you strongly disagreed with a senior leader's strategic direction. How did you navigate the conversation?",
+      "expected_keywords": ["data", "respect", "persuade", "disagree and commit", "alignment", "perspective", "impact", "advocate"],
+      "follow_up_question": "Once the final decision was made, how did you ensure your team stayed fully motivated and aligned?"
+    }
+  ]
+}

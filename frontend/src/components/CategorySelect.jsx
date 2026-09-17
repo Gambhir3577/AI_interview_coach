@@ -37,6 +37,81 @@ import { API_BASE } from '../config.js';
 import { CustomQuestionModal } from './CustomQuestionModal.jsx';
 import { DeviceCheckModal } from './DeviceCheckModal.jsx';
 
+export const DEFAULT_TRACK_QUESTIONS = {
+  swe: {
+    id: 101,
+    category: 'technical',
+    role: 'swe',
+    company_preset: 'general',
+    difficulty: 'Senior',
+    question_text: "Explain how you would design a scalable, low-latency URL shortener service like Bitly. What database, indexing, and caching strategies would you use?",
+    tips: "Discuss database sharding, base62 encoding vs MD5 collisions, Redis LRU cache, and handling 10,000 requests/sec with horizontal scaling."
+  },
+  pm: {
+    id: 102,
+    category: 'product',
+    role: 'pm',
+    company_preset: 'general',
+    difficulty: 'Intermediate',
+    question_text: "How would you prioritize features for the next major release of a mobile ride-sharing app facing declining user retention?",
+    tips: "Structure with user empathy personas, an Impact vs. Effort prioritization matrix, and define core North Star retention metrics."
+  },
+  data_science: {
+    id: 103,
+    category: 'data_science',
+    role: 'data_science',
+    company_preset: 'general',
+    difficulty: 'Senior',
+    question_text: "Explain the trade-offs between Precision and Recall in a real-time fraud detection pipeline. How do you handle severe class imbalance?",
+    tips: "Mention PR-AUC curves, cost-sensitive matrices, SMOTE/undersampling, and latency considerations for online inference."
+  },
+  system_design: {
+    id: 104,
+    category: 'system_design',
+    role: 'system_design',
+    company_preset: 'general',
+    difficulty: 'Senior',
+    question_text: "Design a globally distributed rate limiter that handles 100,000 requests per second with microsecond latency and fault tolerance.",
+    tips: "Compare Token Bucket vs Sliding Window Log, Redis cluster caching, local memory sync, and fail-open strategies."
+  },
+  behavioral: {
+    id: 105,
+    category: 'behavioral',
+    role: 'behavioral',
+    company_preset: 'general',
+    difficulty: 'Intermediate',
+    question_text: "Tell me about a time you had a critical disagreement with a tech lead or product partner on architecture. How did you resolve it?",
+    tips: "Use the STAR format: Situation, Task, Action (compromise, data-driven prototypes), and Result (delivered on time, team trust)."
+  },
+  general: {
+    id: 106,
+    category: 'hr',
+    role: 'general',
+    company_preset: 'general',
+    difficulty: 'Junior',
+    question_text: "Tell me about yourself, your most impactful engineering project, and why you are interested in joining our team.",
+    tips: "Keep your response concise (90-120 seconds). Highlight 2 core strengths and a recent quantifiable achievement."
+  },
+  marketing: {
+    id: 107,
+    category: 'hr',
+    role: 'marketing',
+    company_preset: 'general',
+    difficulty: 'Intermediate',
+    question_text: "How would you design a go-to-market acquisition funnel for a developer tool with zero initial marketing budget?",
+    tips: "Cover product-led growth (PLG), open-source community engagement, developer relations, and organic viral loops."
+  },
+  finance: {
+    id: 108,
+    category: 'technical',
+    role: 'finance',
+    company_preset: 'general',
+    difficulty: 'Senior',
+    question_text: "How do you architect an automated risk scoring model for instant credit card transaction approval under 50ms SLA?",
+    tips: "Discuss low-latency feature stores, online vs offline training pipelines, and regulatory explainability requirements."
+  }
+};
+
 const CAREER_TRACKS = [
   { id: 'swe', title: 'Software Engineering', icon: Code2, color: '#06b6d4', category: 'technical', count: '15+ Prompts', desc: 'Algorithms, distributed systems, API architecture, and concurrency.' },
   { id: 'pm', title: 'Product Management', icon: Briefcase, color: '#ec4899', category: 'product', count: '10+ Prompts', desc: 'Product sense, metrics/execution, user empathy, and prioritization.' },
@@ -72,9 +147,9 @@ export function CategorySelect({ onSelectQuestion, onOpenResumeJD, onOpenNegotia
   const [selectedMode, setSelectedMode] = useState('voice_multiturn');
   const [timerLimit, setTimerLimit] = useState(90); // default 90s
 
-  const [currentQuestion, setCurrentQuestion] = useState(null);
+  const [currentQuestion, setCurrentQuestion] = useState(() => DEFAULT_TRACK_QUESTIONS['swe']);
   const [loading, setLoading] = useState(false);
-  const [allQuestions, setAllQuestions] = useState([]);
+  const [allQuestions, setAllQuestions] = useState(() => [DEFAULT_TRACK_QUESTIONS['swe']]);
   const [showQuestionList, setShowQuestionList] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   
@@ -116,10 +191,16 @@ export function CategorySelect({ onSelectQuestion, onOpenResumeJD, onOpenNegotia
       const res = await fetch(url);
       if (res.ok) {
         const data = await res.json();
-        setCurrentQuestion(data);
+        if (data && data.question_text) {
+          setCurrentQuestion(data);
+          return;
+        }
       }
+      // Fallback
+      setCurrentQuestion(DEFAULT_TRACK_QUESTIONS[trackId] || DEFAULT_TRACK_QUESTIONS['swe']);
     } catch (err) {
-      console.error('Failed to fetch question:', err);
+      console.warn('Falling back to default track question:', err);
+      setCurrentQuestion(DEFAULT_TRACK_QUESTIONS[trackId] || DEFAULT_TRACK_QUESTIONS['swe']);
     } finally {
       setLoading(false);
     }
@@ -130,10 +211,14 @@ export function CategorySelect({ onSelectQuestion, onOpenResumeJD, onOpenNegotia
       const res = await fetch(`${API_BASE}/questions/all?role=${trackId}`);
       if (res.ok) {
         const data = await res.json();
-        setAllQuestions(data);
+        if (Array.isArray(data) && data.length > 0) {
+          setAllQuestions(data);
+          return;
+        }
       }
+      setAllQuestions([DEFAULT_TRACK_QUESTIONS[trackId] || DEFAULT_TRACK_QUESTIONS['swe']]);
     } catch (err) {
-      console.error('Failed to fetch all questions:', err);
+      setAllQuestions([DEFAULT_TRACK_QUESTIONS[trackId] || DEFAULT_TRACK_QUESTIONS['swe']]);
     }
   };
 
@@ -144,13 +229,12 @@ export function CategorySelect({ onSelectQuestion, onOpenResumeJD, onOpenNegotia
   }, [selectedTrack, selectedCompany, selectedDifficulty]);
 
   const handleStartPractice = () => {
-    if (currentQuestion) {
-      onSelectQuestion({
-        ...currentQuestion,
-        practiceMode: selectedMode,
-        timerLimit: timerLimit
-      });
-    }
+    const questionToLaunch = currentQuestion || DEFAULT_TRACK_QUESTIONS[selectedTrack] || DEFAULT_TRACK_QUESTIONS['swe'];
+    onSelectQuestion({
+      ...questionToLaunch,
+      practiceMode: selectedMode,
+      timerLimit: timerLimit
+    });
   };
 
   const filteredQuestions = allQuestions.filter((q) => {
@@ -248,9 +332,58 @@ export function CategorySelect({ onSelectQuestion, onOpenResumeJD, onOpenNegotia
               <span className="gradient-text">Role-Specific AI Coaching</span>
             </h2>
 
-            <p style={{ fontSize: '0.92rem', color: 'var(--text-secondary)', lineHeight: 1.55, marginBottom: '18px' }}>
+            <p style={{ fontSize: '0.92rem', color: 'var(--text-secondary)', lineHeight: 1.55, marginBottom: '16px' }}>
               Practice speaking out loud. Get real-time voice follow-ups, structural STAR feedback, eye-contact/posture analysis, and rewritten model answers.
             </p>
+
+            {/* Quick-Launch Start Interview Banner */}
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '12px',
+                flexWrap: 'wrap',
+                padding: '14px 18px',
+                background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.18) 0%, rgba(236, 72, 153, 0.12) 100%)',
+                borderRadius: '12px',
+                border: '1px solid rgba(99, 102, 241, 0.35)',
+                marginBottom: '18px'
+              }}
+            >
+              <button
+                onClick={handleStartPractice}
+                className="btn btn-primary"
+                style={{
+                  padding: '10px 22px',
+                  background: 'linear-gradient(135deg, #f43f5e 0%, #ec4899 50%, #6366f1 100%)',
+                  boxShadow: '0 4px 18px rgba(244, 63, 94, 0.45)',
+                  fontSize: '0.95rem',
+                  fontWeight: 700
+                }}
+              >
+                <Video size={18} />
+                <span>🎯 Start Interview Now</span>
+                <ArrowRight size={16} />
+              </button>
+
+              <button
+                onClick={() => setIsCustomModalOpen(true)}
+                className="btn btn-secondary"
+                style={{ fontSize: '0.82rem', padding: '8px 14px', background: 'rgba(255, 255, 255, 0.08)' }}
+              >
+                <PlusCircle size={15} color="#38bdf8" />
+                <span>Paste Custom Question</span>
+              </button>
+
+              <button
+                onClick={() => setIsDeviceModalOpen(true)}
+                className="btn btn-secondary"
+                style={{ fontSize: '0.82rem', padding: '8px 14px', background: 'rgba(255, 255, 255, 0.08)' }}
+              >
+                <Camera size={15} color="#34d399" />
+                <span>Test Camera & Mic</span>
+              </button>
+            </div>
 
             {/* Quick Action Tools Hub */}
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
@@ -534,7 +667,7 @@ export function CategorySelect({ onSelectQuestion, onOpenResumeJD, onOpenNegotia
             )}
           </div>
 
-          <div style={{ display: 'flex', gap: '8px' }}>
+          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
             <button
               onClick={() => fetchRandomQuestion(selectedTrack, selectedCompany, selectedDifficulty)}
               disabled={loading}
@@ -552,105 +685,116 @@ export function CategorySelect({ onSelectQuestion, onOpenResumeJD, onOpenNegotia
               <Sliders size={14} />
               <span>{showQuestionList ? 'Hide Browser' : `Browse Bank (${allQuestions.length})`}</span>
             </button>
+            <button
+              onClick={() => setIsCustomModalOpen(true)}
+              className="btn btn-secondary"
+              style={{ fontSize: '0.82rem', padding: '6px 12px' }}
+            >
+              <PlusCircle size={14} color="#38bdf8" />
+              <span>Custom Question</span>
+            </button>
           </div>
         </div>
 
-        {loading ? (
-          <div style={{ padding: '30px 0', textAlign: 'center', color: 'var(--text-muted)' }}>
-            <div className="animate-spin" style={{ display: 'inline-block', marginBottom: '8px' }}>
-              <Sparkles size={24} color="var(--primary)" />
-            </div>
-            <p style={{ fontSize: '0.9rem' }}>Selecting interview prompt...</p>
-          </div>
-        ) : currentQuestion ? (
-          <div>
-            <h3 style={{ fontSize: '1.35rem', fontWeight: 700, color: '#ffffff', lineHeight: 1.4, marginBottom: '14px' }}>
-              "{currentQuestion.question_text}"
-            </h3>
+        <div>
+          <h3 style={{ fontSize: '1.35rem', fontWeight: 700, color: '#ffffff', lineHeight: 1.4, marginBottom: '14px' }}>
+            "{currentQuestion?.question_text || 'Select an interview question to begin practice.'}"
+          </h3>
 
-            {currentQuestion.tips && (
-              <div
-                style={{
-                  display: 'flex',
-                  alignItems: 'flex-start',
-                  gap: '10px',
-                  padding: '12px 16px',
-                  background: 'rgba(99, 102, 241, 0.08)',
-                  borderLeft: '4px solid #6366f1',
-                  borderRadius: '0 8px 8px 0',
-                  marginBottom: '20px'
-                }}
-              >
-                <Lightbulb size={16} color="#818cf8" style={{ marginTop: '2px', flexShrink: 0 }} />
-                <div style={{ fontSize: '0.85rem', color: '#cbd5e1', lineHeight: 1.5 }}>
-                  <strong style={{ color: '#a5b4fc' }}>Coach Tip: </strong>
-                  {currentQuestion.tips}
-                </div>
+          {currentQuestion?.tips && (
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'flex-start',
+                gap: '10px',
+                padding: '12px 16px',
+                background: 'rgba(99, 102, 241, 0.08)',
+                borderLeft: '4px solid #6366f1',
+                borderRadius: '0 8px 8px 0',
+                marginBottom: '20px'
+              }}
+            >
+              <Lightbulb size={16} color="#818cf8" style={{ marginTop: '2px', flexShrink: 0 }} />
+              <div style={{ fontSize: '0.85rem', color: '#cbd5e1', lineHeight: 1.5 }}>
+                <strong style={{ color: '#a5b4fc' }}>Coach Tip: </strong>
+                {currentQuestion.tips}
               </div>
-            )}
-
-            {/* Question Browser Drawer */}
-            {showQuestionList && (
-              <div
-                style={{
-                  marginBottom: '20px',
-                  background: 'rgba(8, 12, 22, 0.85)',
-                  padding: '16px',
-                  borderRadius: '12px',
-                  border: '1px solid rgba(99, 102, 241, 0.25)'
-                }}
-              >
-                <div style={{ marginBottom: '10px' }}>
-                  <input
-                    type="text"
-                    placeholder={`Search questions in ${selectedTrack}...`}
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="auth-input"
-                    style={{ fontSize: '0.85rem', padding: '6px 12px' }}
-                  />
-                </div>
-
-                <div style={{ maxHeight: '200px', overflowY: 'auto' }}>
-                  {filteredQuestions.map((q, idx) => (
-                    <div
-                      key={q.id}
-                      onClick={() => {
-                        setCurrentQuestion(q);
-                        setShowQuestionList(false);
-                      }}
-                      style={{
-                        padding: '8px 12px',
-                        borderRadius: '6px',
-                        cursor: 'pointer',
-                        fontSize: '0.85rem',
-                        background: currentQuestion.id === q.id ? 'rgba(99, 102, 241, 0.25)' : 'transparent',
-                        color: currentQuestion.id === q.id ? '#ffffff' : '#94a3b8',
-                        marginBottom: '3px'
-                      }}
-                    >
-                      <span style={{ color: 'var(--primary-light)', marginRight: 6 }}>#{idx + 1}</span>
-                      <span>{q.question_text}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Start Practice Action */}
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
-              <button
-                onClick={handleStartPractice}
-                className="btn btn-primary btn-lg"
-                style={{ minWidth: '240px' }}
-              >
-                <Video size={18} />
-                <span>Launch Practice Session</span>
-                <ArrowRight size={16} />
-              </button>
             </div>
+          )}
+
+          {/* Question Browser Drawer */}
+          {showQuestionList && (
+            <div
+              style={{
+                marginBottom: '20px',
+                background: 'rgba(8, 12, 22, 0.85)',
+                padding: '16px',
+                borderRadius: '12px',
+                border: '1px solid rgba(99, 102, 241, 0.25)'
+              }}
+            >
+              <div style={{ marginBottom: '10px' }}>
+                <input
+                  type="text"
+                  placeholder={`Search questions in ${selectedTrack}...`}
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="auth-input"
+                  style={{ fontSize: '0.85rem', padding: '6px 12px' }}
+                />
+              </div>
+
+              <div style={{ maxHeight: '200px', overflowY: 'auto' }}>
+                {filteredQuestions.map((q, idx) => (
+                  <div
+                    key={q.id || idx}
+                    onClick={() => {
+                      setCurrentQuestion(q);
+                      setShowQuestionList(false);
+                    }}
+                    style={{
+                      padding: '8px 12px',
+                      borderRadius: '6px',
+                      cursor: 'pointer',
+                      fontSize: '0.85rem',
+                      background: currentQuestion?.id === q.id ? 'rgba(99, 102, 241, 0.25)' : 'transparent',
+                      color: currentQuestion?.id === q.id ? '#ffffff' : '#94a3b8',
+                      marginBottom: '3px'
+                    }}
+                  >
+                    <span style={{ color: 'var(--primary-light)', marginRight: 6 }}>#{idx + 1}</span>
+                    <span>{q.question_text}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Start Practice Action */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px', marginTop: '10px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.82rem', color: 'var(--text-secondary)' }}>
+              <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#10b981' }} />
+              <span>Camera & Microphone Ready &bull; Multi-turn AI follow-ups active</span>
+            </div>
+
+            <button
+              onClick={handleStartPractice}
+              className="btn btn-primary btn-lg"
+              style={{
+                minWidth: '260px',
+                padding: '14px 28px',
+                fontSize: '1rem',
+                fontWeight: 700,
+                background: 'linear-gradient(135deg, #f43f5e 0%, #ec4899 50%, #6366f1 100%)',
+                boxShadow: '0 4px 20px rgba(244, 63, 94, 0.45)'
+              }}
+            >
+              <Video size={18} />
+              <span>🚀 Start Interview Session</span>
+              <ArrowRight size={16} />
+            </button>
           </div>
-        ) : null}
+        </div>
       </div>
 
       {/* Modals */}
