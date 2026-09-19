@@ -315,6 +315,7 @@ class AnalyticsTrendsResponse(BaseModel):
     avg_overall_score: int
     avg_wpm: float
     avg_eye_contact_pct: float
+    streak_days: int = 1
     score_history_timeline: List[Dict[str, Any]]
     domain_proficiencies: List[DomainProficiency]
     identified_weak_spots: List[WeakSpotAlert]

@@ -429,7 +429,135 @@ SEED_QUESTIONS = [
         "star_guidance": json.dumps({"S": "Urgent market window", "T": "MVP vs gold-plated trade-off", "A": "Scoping essentials & telemetry hooks", "R": "Shipped 3 weeks early with 40% adoption"})
     },
 
-    # --- 9. COMPANY PRESET: MCKINSEY & CONSULTING (Case Structure & MECE) ---
+    # --- 9. COMPANY PRESET: APPLE (Design Excellence & User Privacy) ---
+    {
+        "category": "technical",
+        "role": "swe",
+        "company_preset": "apple",
+        "difficulty": "Senior",
+        "question_text": "[Apple: User Privacy & Deep Craftsmanship] How would you architect on-device machine learning inference to guarantee zero user biometric data ever leaves the local enclave?",
+        "tips": "Discuss Secure Enclave, differential privacy, zero-knowledge proofs, hardware acceleration (Neural Engine), and local encrypted keychains.",
+        "star_guidance": json.dumps({"S": "Strict user privacy mandate", "T": "On-device processing constraint", "A": "Secure Enclave integration & local model quantization", "R": "Sub-15ms inference with 100% privacy guarantee"})
+    },
+
+    # --- 10. COMPANY PRESET: MICROSOFT (Growth Mindset & Enterprise Cloud Scale) ---
+    {
+        "category": "behavioral",
+        "role": "behavioral",
+        "company_preset": "microsoft",
+        "difficulty": "Senior",
+        "question_text": "[Microsoft: Growth Mindset] Describe an instance where a project you championed fundamentally failed or lost market adoption. How did you transform that failure into an organizational learning asset?",
+        "tips": "Emphasize vulnerability, empathy, learning over knowing, post-mortem blameless culture, and driving enterprise product evolution.",
+        "star_guidance": json.dumps({"S": "Failed product initiative", "T": "Navigating disappointment & team morale", "A": "Synthesizing deep customer feedback & sharing lessons across org", "R": "Next generation product reached 1M+ active users"})
+    },
+
+    # --- 11. COMPANY PRESET: OPENAI (Scaled AI Infrastructure & Model Alignment) ---
+    {
+        "category": "technical",
+        "role": "swe",
+        "company_preset": "openai",
+        "difficulty": "Senior",
+        "question_text": "[OpenAI: Scaled AI Systems] How would you design a distributed inference serving cluster capable of handling 50,000 concurrent streaming LLM token requests with strict P99 latency bounds under 100ms?",
+        "tips": "Discuss continuous batching (vLLM/TGI), PagedAttention, KV-cache memory management, speculative decoding, and load balancing across GPU clusters.",
+        "star_guidance": json.dumps({"S": "Massive LLM streaming traffic spike", "T": "GPU memory & token latency bottleneck", "A": "Continuous batching & distributed KV-cache routing", "R": "P99 token generation latency reduced to 42ms"})
+    },
+
+    # --- 12. COMPANY PRESET: STRIPE (High-Throughput APIs & Financial Precision) ---
+    {
+        "category": "technical",
+        "role": "swe",
+        "company_preset": "stripe",
+        "difficulty": "Senior",
+        "question_text": "[Stripe: Idempotency & Financial Reliability] How do you guarantee exact idempotency for distributed payment webhooks when network partitions cause duplicate delivery attempts?",
+        "tips": "Walk through unique idempotency keys, distributed locks, database unique constraints, atomic double-entry ledger state transitions, and exponential backoff.",
+        "star_guidance": json.dumps({"S": "Duplicate payment webhook retries", "T": "Zero double-charge tolerance", "A": "Idempotency key locking & atomic ledger recording", "R": "100% financial consistency across 50M daily transactions"})
+    },
+
+    # --- 13. COMPANY PRESET: NETFLIX (Freedom & Responsibility & Chaos Engineering) ---
+    {
+        "category": "technical",
+        "role": "swe",
+        "company_preset": "netflix",
+        "difficulty": "Senior",
+        "question_text": "[Netflix: High Availability & Chaos Testing] How would you design a global video catalog service to withstand sudden total loss of an AWS primary region without dropping stream playback?",
+        "tips": "Discuss multi-region active-active replication, Cassandra/Spanner globally distributed storage, Chaos Monkey fault injection, and fallback degraded mode responses.",
+        "star_guidance": json.dumps({"S": "Global region outage resilience", "T": "Zero playback disruption for 200M users", "A": "Active-active multi-region mesh & Chaos testing", "R": "Automated regional failover completed in under 3 seconds"})
+    },
+
+    # --- 14. COMPANY PRESET: UBER (Real-time Dispatch & Geospatial Concurrency) ---
+    {
+        "category": "technical",
+        "role": "swe",
+        "company_preset": "uber",
+        "difficulty": "Senior",
+        "question_text": "[Uber: Geospatial Systems] Design a real-time driver-rider matchmaking system handling millions of moving coordinate updates per second.",
+        "tips": "Explain spatial indexing (H3 / S2 / Geohash), in-memory Redis cluster partitioning, ring buffers, WebSockets dispatch, and dynamic surge pricing algorithms.",
+        "star_guidance": json.dumps({"S": "Millions of concurrent GPS updates", "T": "Sub-second driver matching", "A": "H3 hexagonal spatial partitioning & Redis geospatial indexing", "R": "Match latency dropped to 180ms with 99.99% dispatch accuracy"})
+    },
+
+    # --- 15. COMPANY PRESET: SALESFORCE (Enterprise Multi-Tenant SaaS) ---
+    {
+        "category": "technical",
+        "role": "swe",
+        "company_preset": "salesforce",
+        "difficulty": "Intermediate",
+        "question_text": "[Salesforce: Multi-Tenant Architecture] How do you isolate tenant data and prevent 'noisy neighbor' resource starvation in a shared database multi-tenant architecture?",
+        "tips": "Explain tenant ID partitioning, row-level security, rate limiting & circuit breakers per tenant, separate read replicas for heavy reporting, and governor limits.",
+        "star_guidance": json.dumps({"S": "Enterprise noisy neighbor problem", "T": "Fair tenant resource distribution", "A": "Governor execution limits & tenant query routing", "R": "Tenant SLA breaches reduced to 0%"})
+    },
+
+    # --- 16. COMPANY PRESET: ORACLE (Database Internals & Enterprise Reliability) ---
+    {
+        "category": "technical",
+        "role": "swe",
+        "company_preset": "oracle",
+        "difficulty": "Intermediate",
+        "question_text": "[Oracle: Relational Systems] Explain write-ahead logging (WAL), multi-version concurrency control (MVCC), and how database lock escalation impacts concurrent transactions.",
+        "tips": "Discuss ACID durability via WAL, undo/redo logs, snapshot isolation vs serializable isolation, deadlocks, and B-tree index contention.",
+        "star_guidance": json.dumps({"S": "High lock contention on billing tables", "T": "Explain core DB engine mechanics", "A": "Optimizing transaction boundaries & MVCC snapshotting", "R": "Database throughput increased by 3.2x"})
+    },
+
+    # --- 17. COMPANY PRESET: EARLY-STAGE STARTUP (0-to-1 MVP & Full-Stack Ownership) ---
+    {
+        "category": "technical",
+        "role": "swe",
+        "company_preset": "startup_early",
+        "difficulty": "Junior",
+        "question_text": "[Startup: 0-to-1 Shipping] We need to launch a functional customer-facing prototype by next Monday with zero existing infrastructure. How do you choose your tech stack and prioritize features?",
+        "tips": "Prioritize speed of iteration, managed PaaS (Vercel, Supabase, Next.js), cutting non-essential scope, direct customer feedback loops, and pragmatic code reuse.",
+        "star_guidance": json.dumps({"S": "Tight 5-day prototype launch window", "T": "Scope definition & tech stack selection", "A": "Serverless stack, pre-built auth/DB, core workflow MVP", "R": "Shipped ahead of deadline and onboarded first 50 pilot customers"})
+    },
+    {
+        "category": "behavioral",
+        "role": "general",
+        "company_preset": "startup_early",
+        "difficulty": "Intermediate",
+        "question_text": "[Startup: Wearing Many Hats] Describe a time at work when you were assigned a task completely outside your job description and had to learn on the fly with no documentation.",
+        "tips": "Demonstrate resourcefulness, extreme ownership, rapid self-directed learning, proactive communication, and delivering results without hand-holding.",
+        "star_guidance": json.dumps({"S": "Unfamiliar critical domain challenge", "T": "No existing runbooks or mentors", "A": "Rapid self-study, prototyping & iterative execution", "R": "Built operational process and trained peer team members"})
+    },
+
+    # --- 18. COMPANY PRESET: IT SERVICES & CONSULTING (TCS, Infosys, Wipro, Accenture) ---
+    {
+        "category": "technical",
+        "role": "swe",
+        "company_preset": "service_it",
+        "difficulty": "Junior",
+        "question_text": "[IT Services: Core OOP & Java/Python Fundamentals] Explain method overloading vs overriding, memory allocation (Stack vs Heap), and how Garbage Collection works.",
+        "tips": "Provide clear, structured explanations of compile-time vs runtime polymorphism, object reference lifecycles, and mark-and-sweep garbage collection phases.",
+        "star_guidance": json.dumps({"S": "Core programming interview benchmark", "T": "Explain fundamental memory & polymorphism concepts", "A": "Code syntax demonstration & clear lifecycle breakdown", "R": "Accurate technical explanation with edge case knowledge"})
+    },
+    {
+        "category": "behavioral",
+        "role": "general",
+        "company_preset": "service_it",
+        "difficulty": "Intermediate",
+        "question_text": "[IT Services: Client Delivery & SLA Management] How do you handle a situation where an international enterprise client changes project requirements 2 days before the sprint deployment deadline?",
+        "tips": "Explain change request governance, impact analysis on existing deliverables, transparent client communication, risk mitigation, and renegotiating timelines collaboratively.",
+        "star_guidance": json.dumps({"S": "Late client scope change", "T": "Risk to production SLA", "A": "Impact analysis & consultative alternative proposal", "R": "Delivered priority features on schedule with formal phase 2 roadmap"})
+    },
+
+    # --- 19. COMPANY PRESET: MCKINSEY & CONSULTING (Case Structure & MECE) ---
     {
         "category": "product",
         "role": "general",
@@ -440,7 +568,7 @@ SEED_QUESTIONS = [
         "star_guidance": json.dumps({"S": "EV client expansion objective", "T": "MECE framework definition", "A": "Analyze 4 key pillars & financials", "R": "Go/No-Go recommendation with risk mitigations"})
     },
 
-    # --- 10. MARKETING & GROWTH ---
+    # --- 20. MARKETING & GROWTH ---
     {
         "category": "hr",
         "role": "marketing",
@@ -451,7 +579,7 @@ SEED_QUESTIONS = [
         "star_guidance": json.dumps({"S": "Growth plateau context", "T": "Target CAC & LTV targets", "A": "Multi-channel funnel optimization", "R": "35% CAC drop and 2.4x revenue uplift"})
     },
 
-    # --- 11. FINANCE & FINTECH ---
+    # --- 21. FINANCE & FINTECH ---
     {
         "category": "technical",
         "role": "finance",
@@ -462,7 +590,7 @@ SEED_QUESTIONS = [
         "star_guidance": json.dumps({"S": "Instant underwriting requirement", "T": "Balancing default rate vs approval speed", "A": "Real-time ML risk engine & SHAP explainability", "R": "Default rate reduced by 22% while boosting approvals"})
     },
 
-    # --- 12. SALARY NEGOTIATION / ADVANCED BEHAVIORAL ---
+    # --- 22. SALARY NEGOTIATION / ADVANCED BEHAVIORAL ---
     {
         "category": "behavioral",
         "role": "general",
@@ -532,27 +660,24 @@ def init_db():
     except Exception as e:
         print(f"[DB Migration Note] {e}")
 
-    # Seed questions if empty or replenish with rich questions
+    # Seed any missing questions from SEED_QUESTIONS
     db = SessionLocal()
     try:
-        amazon_count = db.query(Question).filter(Question.company_preset == "amazon").count()
-        if amazon_count == 0:
-            for item in SEED_QUESTIONS:
-                # Check if question text already exists
-                exists = db.query(Question).filter(Question.question_text == item["question_text"]).first()
-                if not exists:
-                    q = Question(
-                        category=item["category"],
-                        role=item.get("role", "general"),
-                        company_preset=item.get("company_preset", "general"),
-                        difficulty=item.get("difficulty", "Intermediate"),
-                        language=item.get("language", "en"),
-                        question_text=item["question_text"],
-                        tips=item.get("tips"),
-                        star_guidance=item.get("star_guidance")
-                    )
-                    db.add(q)
-            db.commit()
+        for item in SEED_QUESTIONS:
+            exists = db.query(Question).filter(Question.question_text == item["question_text"]).first()
+            if not exists:
+                q = Question(
+                    category=item["category"],
+                    role=item.get("role", "general"),
+                    company_preset=item.get("company_preset", "general"),
+                    difficulty=item.get("difficulty", "Intermediate"),
+                    language=item.get("language", "en"),
+                    question_text=item["question_text"],
+                    tips=item.get("tips"),
+                    star_guidance=item.get("star_guidance")
+                )
+                db.add(q)
+        db.commit()
     finally:
         db.close()
 

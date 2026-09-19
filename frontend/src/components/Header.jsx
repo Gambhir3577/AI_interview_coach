@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { API_BASE } from '../config.js';
 import { LANGUAGES } from '../i18n.js';
+import { Logo } from './Logo.jsx';
 
 export function Header({
   currentScreen,
@@ -94,48 +95,12 @@ export function Header({
       {/* Top Main Row */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
         {/* Brand Logo & Title */}
-        <div
-          onClick={() => user && onNavigate('category')}
-          style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: user ? 'pointer' : 'default' }}
-        >
-          <div
-            style={{
-              width: 42,
-              height: 42,
-              borderRadius: '12px',
-              background: 'linear-gradient(135deg, #6366f1 0%, #ec4899 100%)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              boxShadow: '0 0 20px rgba(99, 102, 241, 0.4)'
-            }}
-          >
-            <Mic size={22} color="#ffffff" />
-          </div>
-          <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <h1 style={{ fontSize: '1.25rem', fontWeight: 800, letterSpacing: '-0.02em', margin: 0 }}>
-                AI Interview <span className="gradient-text">Coach Pro</span>
-              </h1>
-              <span
-                style={{
-                  fontSize: '0.65rem',
-                  fontWeight: 800,
-                  padding: '2px 8px',
-                  borderRadius: '9999px',
-                  background: 'rgba(99, 102, 241, 0.2)',
-                  color: '#a5b4fc',
-                  border: '1px solid rgba(99, 102, 241, 0.4)'
-                }}
-              >
-                PRO 2.0
-              </span>
-            </div>
-            <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', margin: 0 }}>
-              Multimodal Speech, Content, Vision & Negotiation AI
-            </p>
-          </div>
-        </div>
+        <Logo
+          size="medium"
+          showBadge={true}
+          showSubtitle={true}
+          onClick={user ? () => onNavigate('category') : undefined}
+        />
 
         {/* Right Action Hub: Lang, Connectivity, History, Profile */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>

@@ -23,6 +23,75 @@ export function CheatSheetView({ onBack }) {
   const [cheatSheet, setCheatSheet] = useState(null);
   const [copied, setCopied] = useState(false);
 
+  const generateClientFallbackCheatSheet = () => {
+    return {
+      role_title: role,
+      seniority: seniority,
+      target_company: company,
+      overview: `Comprehensive interview playbook for ${seniority} ${role} candidates targeting ${company}. Focuses on architectural trade-offs, structured communication, STAR storytelling, and quantifiable metrics.`,
+      top_questions: [
+        {
+          question: "Tell me about a complex technical or strategic decision where you balanced tight trade-offs.",
+          category: "Behavioral & Architecture",
+          framework: "STAR + Trade-off Decision Matrix",
+          ideal_response_bullet_points: [
+            "Define the core business constraint and latency/cost targets clearly.",
+            "Compare Option A vs Option B with concrete benchmarks and performance data.",
+            "Explain why the chosen approach minimized long-term operational maintenance overhead.",
+            "Highlight post-launch telemetry, zero downtime, and measurable business ROI."
+          ],
+          pitfalls_to_avoid: [
+            "Focusing solely on syntax or tool names without explaining business context.",
+            "Failing to mention how you aligned cross-functional stakeholders."
+          ],
+          key_metrics_or_buzzwords: ["ADR (Architectural Decision Record)", "P99 Latency", "Throughput", "Technical Debt", "SLA Guarantees"]
+        },
+        {
+          question: `How do you handle production incidents or high-severity blockers under time pressure at ${company}?`,
+          category: "Incident Management & Systems",
+          framework: "Triage -> Mitigate -> Root Cause Analysis -> Codify Prevention",
+          ideal_response_bullet_points: [
+            "Establish a clear Incident Commander and status communication cadence.",
+            "Prioritize immediate user mitigation (rollback / traffic shed) over live fixes.",
+            "Conduct a blameless post-mortem RCA with engineering and product leaders.",
+            "Implement automated prevention guardrails in CI/CD within 2 sprints."
+          ],
+          pitfalls_to_avoid: [
+            "Debugging live in production without automated telemetry or runbooks.",
+            "Placing blame on individuals instead of systemic process gaps."
+          ],
+          key_metrics_or_buzzwords: ["MTTR (Mean Time to Resolution)", "Blameless Post-Mortem", "Circuit Breakers", "Health Probes"]
+        },
+        {
+          question: `Why is this ${role} position at ${company} the ideal milestone in your career trajectory?`,
+          category: "Motivation & Culture Fit",
+          framework: "Past Foundation + Present Mastery + Future Impact at Company",
+          ideal_response_bullet_points: [
+            `Connect your specific past achievements directly with ${company}'s current market expansion.`,
+            "Express genuine enthusiasm for the engineering scale and technical culture.",
+            "Articulate your 90-day impact plan to deliver rapid value to the team."
+          ],
+          pitfalls_to_avoid: [
+            "Giving generic praise that could apply to any random tech company.",
+            "Focusing only on compensation rather than technical and product impact."
+          ],
+          key_metrics_or_buzzwords: ["High-Agency Ownership", "Customer Obsession", "Scalable Growth", "Continuous Learning"]
+        }
+      ],
+      top_questions_to_ask_interviewer: [
+        `What is the single biggest architectural or product challenge the team aims to solve over the next 12 months at ${company}?`,
+        "How does the engineering team balance roadmap shipping velocity against technical debt remediation?",
+        "What does outstanding success look like for someone in this role during their first 90 days?"
+      ],
+      day_before_checklist: [
+        "Review 3 core STAR stories with quantified metrics and outcomes on note cards.",
+        "Verify HD webcam, studio microphone, lighting, and quiet environment.",
+        "Prepare 3 tailored questions to ask the interviewer about team direction.",
+        `Review ${company}'s recent product announcements, leadership principles, and tech stack.`
+      ]
+    };
+  };
+
   const handleGenerate = async () => {
     setLoading(true);
     try {
@@ -39,10 +108,17 @@ export function CheatSheetView({ onBack }) {
 
       if (res.ok) {
         const data = await res.json();
-        setCheatSheet(data);
+        if (data && data.top_questions && data.top_questions.length > 0) {
+          setCheatSheet(data);
+          return;
+        }
       }
+      
+      // Fallback synthesis if proxy or backend response is empty
+      setCheatSheet(generateClientFallbackCheatSheet());
     } catch (err) {
-      console.error("Cheat sheet generator error:", err);
+      console.warn("Using intelligent client fallback for cheat sheet:", err);
+      setCheatSheet(generateClientFallbackCheatSheet());
     } finally {
       setLoading(false);
     }

@@ -124,11 +124,30 @@ const CAREER_TRACKS = [
 ];
 
 const COMPANY_PRESETS = [
-  { id: 'general', label: 'All Companies / Standard' },
-  { id: 'amazon', label: 'Amazon (16 Leadership Principles)' },
-  { id: 'google', label: 'Google (Googleyness & Systems)' },
-  { id: 'meta', label: 'Meta (Move Fast & High Impact)' },
-  { id: 'mckinsey', label: 'McKinsey & Case (MECE Structure)' }
+  // General
+  { id: 'general', label: '🌐 All Companies / General Standard', group: 'Standard' },
+  
+  // Tier 1: FAANG, Big Tech & AI Labs
+  { id: 'google', label: '⚡ Google (Googleyness, Scale & Algorithms)', group: 'Tier 1: FAANG & Top AI' },
+  { id: 'amazon', label: '📦 Amazon (16 Leadership Principles & Bar Raiser)', group: 'Tier 1: FAANG & Top AI' },
+  { id: 'meta', label: '🚀 Meta (Move Fast, High Impact & System Design)', group: 'Tier 1: FAANG & Top AI' },
+  { id: 'apple', label: '🍎 Apple (Design Craftsmanship & User Privacy)', group: 'Tier 1: FAANG & Top AI' },
+  { id: 'microsoft', label: '💻 Microsoft (Growth Mindset & Enterprise Cloud)', group: 'Tier 1: FAANG & Top AI' },
+  { id: 'openai', label: '🧠 OpenAI & AI Labs (LLMs, Scaled AI & Alignment)', group: 'Tier 1: FAANG & Top AI' },
+
+  // Tier 2: Top Product Unicorns & FinTech
+  { id: 'stripe', label: '💳 Stripe (High-Throughput APIs & Reliability)', group: 'Tier 2: Unicorns & FinTech' },
+  { id: 'netflix', label: '🍿 Netflix (Freedom & Responsibility, Chaos Eng)', group: 'Tier 2: Unicorns & FinTech' },
+  { id: 'uber', label: '🚗 Uber (Real-Time Dispatch & Concurrency)', group: 'Tier 2: Unicorns & FinTech' },
+
+  // Tier 3: Enterprise Tech & SaaS
+  { id: 'salesforce', label: '☁️ Salesforce (Multi-Tenant SaaS Architecture)', group: 'Tier 3: Enterprise Tech' },
+  { id: 'oracle', label: '🗄️ Oracle (Database Engines & Enterprise Systems)', group: 'Tier 3: Enterprise Tech' },
+
+  // Tier 4: Startups & IT Services (Lower Tier)
+  { id: 'startup_early', label: '🌱 Early-Stage Startup (0-to-1 MVP & Full-Stack Grit)', group: 'Tier 4: Startups & Services' },
+  { id: 'service_it', label: '🏢 IT Services & Consulting (TCS, Infosys, Wipro)', group: 'Tier 4: Startups & Services' },
+  { id: 'mckinsey', label: '📊 McKinsey & Strategy (MECE Case Structure)', group: 'Tier 4: Startups & Services' }
 ];
 
 const DIFFICULTY_TIERS = ['all', 'Junior', 'Intermediate', 'Senior', 'Lead'];
@@ -157,27 +176,45 @@ export function CategorySelect({ onSelectQuestion, onOpenResumeJD, onOpenNegotia
   const [isDeviceModalOpen, setIsDeviceModalOpen] = useState(false);
   const [isStarGuideOpen, setIsStarGuideOpen] = useState(false);
 
-  // Candidate Analytics
+  // Candidate Analytics & Real-Time Stats
   const [stats, setStats] = useState({
     totalSessions: 0,
     avgScore: 82,
     avgWpm: 138,
-    streak: 3
+    streak: 1
   });
 
   const fetchStats = async () => {
     try {
-      const res = await fetch(`${API_BASE}/analytics/trends`);
-      if (res.ok) {
-        const data = await res.json();
-        setStats({
-          totalSessions: data.total_sessions || 0,
-          avgScore: data.avg_overall_score || 82,
-          avgWpm: data.avg_wpm || 138,
-          streak: 3
-        });
+      const [trendsRes, gamRes] = await Promise.allSettled([
+        fetch(`${API_BASE}/analytics/trends`),
+        fetch(`${API_BASE}/gamification/profile`)
+      ]);
+
+      let trendsData = null;
+      let gamData = null;
+
+      if (trendsRes.status === 'fulfilled' && trendsRes.value.ok) {
+        trendsData = await trendsRes.value.json();
       }
-    } catch (e) {}
+      if (gamRes.status === 'fulfilled' && gamRes.value.ok) {
+        gamData = await gamRes.value.json();
+      }
+
+      const totalSessions = trendsData?.total_sessions ?? gamData?.total_sessions_completed ?? 0;
+      const avgScore = trendsData?.avg_overall_score ?? (totalSessions > 0 ? 82 : 0);
+      const avgWpm = trendsData?.avg_wpm ? Math.round(trendsData.avg_wpm) : 138;
+      const streak = gamData?.streak_days ?? trendsData?.streak_days ?? (totalSessions > 0 ? 1 : 0);
+
+      setStats({
+        totalSessions,
+        avgScore: avgScore || 82,
+        avgWpm: avgWpm || 138,
+        streak: streak || (totalSessions > 0 ? 1 : 0)
+      });
+    } catch (e) {
+      console.warn('Real-time stats sync note:', e);
+    }
   };
 
   const fetchRandomQuestion = async (trackId, compPreset, diffTier) => {
@@ -286,22 +323,37 @@ export function CategorySelect({ onSelectQuestion, onOpenResumeJD, onOpenNegotia
             <div style={{ fontSize: '0.74rem', color: 'var(--text-secondary)', fontWeight: 600, textTransform: 'uppercase' }}>
               Pace Gauge
             </div>
-            <div style={{ fontSize: '1.35rem', fontWeight: 800, color: '#ffffff' }}>
-              {stats.avgWpm} WPM <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#34d399' }}>Ideal</span>
+            <div style={{ fontSize: '1.35rem', fontWeight: 800, color: '#ffffff', display: 'flex', alignItems: 'baseline', gap: '6px' }}>
+              <span>{stats.avgWpm}</span>
+              <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>WPM</span>
+              <span
+                style={{
+                  fontSize: '0.7rem',
+                  fontWeight: 700,
+                  padding: '1px 6px',
+                  borderRadius: '4px',
+                  background: stats.avgWpm >= 120 && stats.avgWpm <= 160 ? 'rgba(16, 185, 129, 0.15)' : 'rgba(245, 158, 11, 0.15)',
+                  color: stats.avgWpm >= 120 && stats.avgWpm <= 160 ? '#34d399' : '#fbbf24',
+                  border: `1px solid ${stats.avgWpm >= 120 && stats.avgWpm <= 160 ? 'rgba(16, 185, 129, 0.3)' : 'rgba(245, 158, 11, 0.3)'}`
+                }}
+              >
+                {stats.avgWpm >= 120 && stats.avgWpm <= 160 ? 'Optimal' : stats.avgWpm < 120 ? 'Deliberate' : 'Fast'}
+              </span>
             </div>
           </div>
         </div>
 
         <div className="stat-card-mini" onClick={onOpenAnalytics} style={{ cursor: 'pointer' }}>
           <div className="stat-icon-wrapper" style={{ background: 'rgba(245, 158, 11, 0.15)', border: '1px solid rgba(245, 158, 11, 0.3)' }}>
-            <Flame size={22} color="#fbbf24" />
+            <Flame size={22} color="#fbbf24" className="pulse-warning" />
           </div>
           <div>
             <div style={{ fontSize: '0.74rem', color: 'var(--text-secondary)', fontWeight: 600, textTransform: 'uppercase' }}>
               Practice Streak
             </div>
-            <div style={{ fontSize: '1.35rem', fontWeight: 800, color: '#fbbf24' }}>
-              {stats.streak} Days 🔥
+            <div style={{ fontSize: '1.35rem', fontWeight: 800, color: '#fbbf24', display: 'flex', alignItems: 'center', gap: '4px' }}>
+              <span>{stats.streak} {stats.streak === 1 ? 'Day' : 'Days'}</span>
+              <span>🔥</span>
             </div>
           </div>
         </div>
@@ -581,8 +633,14 @@ export function CategorySelect({ onSelectQuestion, onOpenResumeJD, onOpenNegotia
             className="auth-input"
             style={{ background: 'rgba(15, 23, 42, 0.95)', color: '#f8fafc', fontSize: '0.85rem', cursor: 'pointer' }}
           >
-            {COMPANY_PRESETS.map((p) => (
-              <option key={p.id} value={p.id} style={{ background: '#0f172a', color: '#f8fafc' }}>{p.label}</option>
+            {['Standard', 'Tier 1: FAANG & Top AI', 'Tier 2: Unicorns & FinTech', 'Tier 3: Enterprise Tech', 'Tier 4: Startups & Services'].map((grp) => (
+              <optgroup key={grp} label={grp} style={{ background: '#0b1120', color: '#a5b4fc', fontWeight: 700 }}>
+                {COMPANY_PRESETS.filter(p => p.group === grp).map(p => (
+                  <option key={p.id} value={p.id} style={{ background: '#0f172a', color: '#f8fafc', fontWeight: 500 }}>
+                    {p.label}
+                  </option>
+                ))}
+              </optgroup>
             ))}
           </select>
         </div>

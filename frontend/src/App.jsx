@@ -11,6 +11,7 @@ import { SalaryNegotiationView } from './components/SalaryNegotiationView.jsx';
 import { CheatSheetView } from './components/CheatSheetView.jsx';
 import { DebriefView } from './components/DebriefView.jsx';
 import { AnalyticsDashboardModal } from './components/AnalyticsDashboardModal.jsx';
+import { AnimatedBackground } from './components/AnimatedBackground.jsx';
 import { API_BASE } from './config.js';
 
 export default function App() {
@@ -139,7 +140,10 @@ export default function App() {
   };
 
   return (
-    <div className="app-container">
+    <div className="app-container" style={{ position: 'relative' }}>
+      {/* Animated Ambient Background for Dashboard */}
+      {user && <AnimatedBackground variant="dashboard" />}
+
       {/* Top Application Header */}
       <Header
         currentScreen={currentScreen}

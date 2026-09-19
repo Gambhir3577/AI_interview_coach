@@ -197,6 +197,7 @@ def test_gamification_profile():
     assert response.status_code == 200
     data = response.json()
     assert "xp_points" in data
+    assert "streak_days" in data
     assert len(data["badges"]) >= 5
 
 
@@ -205,4 +206,27 @@ def test_analytics_trends():
     assert response.status_code == 200
     data = response.json()
     assert "avg_overall_score" in data
+    assert "streak_days" in data
     assert len(data["domain_proficiencies"]) >= 1
+
+
+def test_multi_tier_company_presets():
+    tiers_to_test = [
+        ("google", "Google"),
+        ("apple", "Apple"),
+        ("microsoft", "Microsoft"),
+        ("openai", "OpenAI"),
+        ("stripe", "Stripe"),
+        ("netflix", "Netflix"),
+        ("uber", "Uber"),
+        ("salesforce", "Salesforce"),
+        ("oracle", "Oracle"),
+        ("startup_early", "Startup"),
+        ("service_it", "IT Services")
+    ]
+    for preset_id, keyword in tiers_to_test:
+        res = client.get(f"/questions?company_preset={preset_id}")
+        assert res.status_code == 200, f"Failed for {preset_id}"
+        q_data = res.json()
+        assert keyword.lower() in q_data["question_text"].lower(), f"Keyword {keyword} not found in {q_data['question_text']}"
+

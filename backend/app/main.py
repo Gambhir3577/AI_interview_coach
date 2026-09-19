@@ -368,8 +368,9 @@ async def analyze_interview_recording(
         )
         db.add(session_record)
         
-        # 9. Update Gamification stats
+        # 9. Update Gamification stats with real-time streak calculation
         gamification = db.query(UserGamification).filter(UserGamification.user_id == "default_user").first()
+        today_str = created_at_dt.strftime("%Y-%m-%d")
         if not gamification:
             gamification = UserGamification(
                 user_id="default_user",
@@ -378,7 +379,7 @@ async def analyze_interview_recording(
                 total_sessions_completed=1,
                 xp_points=150,
                 unlocked_badges=json.dumps(["first_pitch"]),
-                last_practice_date=created_at_dt.strftime("%Y-%m-%d")
+                last_practice_date=today_str
             )
             db.add(gamification)
         else:
@@ -386,17 +387,36 @@ async def analyze_interview_recording(
             gamification.total_sessions_completed += 1
             gamification.xp_points += 75 if overall_score >= 80 else 50
             
+            # Real-time Streak continuity tracking
+            if gamification.last_practice_date:
+                try:
+                    last_dt = datetime.strptime(gamification.last_practice_date, "%Y-%m-%d").date()
+                    curr_dt = created_at_dt.date()
+                    day_diff = (curr_dt - last_dt).days
+                    if day_diff == 1:
+                        gamification.streak_days += 1
+                    elif day_diff > 1:
+                        gamification.streak_days = 1
+                    # If day_diff == 0 (practiced today), maintain current streak
+                except Exception:
+                    gamification.streak_days = max(1, gamification.streak_days)
+            else:
+                gamification.streak_days = 1
+            gamification.last_practice_date = today_str
+            
             # Badge checks
             unlocked = json.loads(gamification.unlocked_badges or "[]")
             if "first_pitch" not in unlocked:
                 unlocked.append("first_pitch")
+            if gamification.streak_days >= 7 and "streak_warrior" not in unlocked:
+                unlocked.append("streak_warrior")
             if overall_score >= 85 and "star_master" not in unlocked and content_feedback.uses_star_method:
                 unlocked.append("star_master")
             if speech_metrics.filler_count == 0 and speech_metrics.duration_seconds >= 30 and "zero_fillers" not in unlocked:
                 unlocked.append("zero_fillers")
             if eye_metrics.eye_contact_percentage >= 80 and "locked_in" not in unlocked:
                 unlocked.append("locked_in")
-            if actual_company.lower() in ["amazon", "google"] and "faang_ready" not in unlocked:
+            if actual_company.lower() in ["amazon", "google", "meta", "apple", "microsoft", "openai"] and "faang_ready" not in unlocked:
                 unlocked.append("faang_ready")
             gamification.unlocked_badges = json.dumps(unlocked)
 
@@ -676,17 +696,20 @@ def get_gamification_profile(db: Session = Depends(get_db)):
             unlocked_at=b.unlocked_at if is_unlocked else None
         ))
 
-    total_secs = gamification.total_practice_seconds if gamification else 420
+    total_secs = gamification.total_practice_seconds if gamification else 0
     total_sessions = gamification.total_sessions_completed if gamification else db.query(InterviewSession).count()
-    xp = gamification.xp_points if gamification else 350
+    xp = gamification.xp_points if gamification else max(100, total_sessions * 75)
     level = max(1, xp // 200)
 
     level_titles = ["Novice Candidate", "Confident Speaker", "Articulate Storyteller", "Interview Maestro", "Principal Leader"]
     title = level_titles[min(len(level_titles) - 1, level - 1)]
 
+    # Dynamic streak from gamification or sessions
+    calculated_streak = gamification.streak_days if (gamification and gamification.streak_days > 0) else (1 if total_sessions > 0 else 0)
+
     return GamificationProfileResponse(
         user_id="default_user",
-        streak_days=gamification.streak_days if gamification else 3,
+        streak_days=calculated_streak,
         total_practice_minutes=round(total_secs / 60),
         total_sessions_completed=total_sessions,
         xp_points=xp,
@@ -798,11 +821,15 @@ def get_analytics_trends(db: Session = Depends(get_db)):
     else:
         adaptive_level = "Foundational / Intermediate"
 
+    gamification = db.query(UserGamification).filter(UserGamification.user_id == "default_user").first()
+    live_streak = gamification.streak_days if gamification else (1 if total_count > 0 else 0)
+
     return AnalyticsTrendsResponse(
         total_sessions=total_count,
         avg_overall_score=avg_score,
         avg_wpm=avg_wpm,
         avg_eye_contact_pct=avg_eye,
+        streak_days=live_streak,
         score_history_timeline=timeline,
         domain_proficiencies=proficiencies,
         identified_weak_spots=weak_alerts,

@@ -17,6 +17,8 @@ import {
   Smile
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
+import { Logo } from './Logo.jsx';
+import { AnimatedBackground } from './AnimatedBackground.jsx';
 
 const CAREER_TRACKS = [
   { id: 'swe', label: 'Software Engineer', icon: Code2, color: '#6366f1' },
@@ -112,17 +114,17 @@ export function AuthScreen({ onLoginSuccess }) {
 
   return (
     <div style={{ position: 'relative', width: '100%', minHeight: '82vh' }}>
-      {/* Ambient Floating Orbs */}
-      <div className="auth-bg-ambient">
-        <div className="auth-orb auth-orb-1" />
-        <div className="auth-orb auth-orb-2" />
-        <div className="auth-orb auth-orb-3" />
-      </div>
+      {/* Animated Multi-Layer Ambient Background */}
+      <AnimatedBackground variant="login" />
 
-      <div className="auth-container">
+      <div className="auth-container" style={{ position: 'relative', zIndex: 1 }}>
         {/* Left Side: Multimodal AI Showcase & Creative Animated Visualizer */}
         <div className="auth-hero-card">
           <div>
+            <div style={{ marginBottom: '20px' }}>
+              <Logo size="large" showBadge={true} showSubtitle={false} />
+            </div>
+
             <div
               style={{
                 display: 'inline-flex',
@@ -139,7 +141,7 @@ export function AuthScreen({ onLoginSuccess }) {
               }}
             >
               <Sparkles size={15} />
-              <span>Next-Gen Mock Interview Studio</span>
+              <span>Next-Gen Real-Time AI Mock Studio</span>
             </div>
 
             <h2 style={{ fontSize: '2rem', lineHeight: 1.2, marginBottom: '12px' }}>
@@ -348,14 +350,14 @@ export function AuthScreen({ onLoginSuccess }) {
             {authMode === 'signup' && (
               <div className="auth-input-group">
                 <label className="auth-input-label">
-                  <User size={14} /> Full Name
+                  <User size={14} color="#818cf8" /> Full Name
                 </label>
                 <div className="auth-input-wrapper">
                   <User className="auth-input-icon" size={18} />
                   <input
                     type="text"
                     required
-                    placeholder="e.g. Sarah Connor"
+                    placeholder="Enter your full name"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     className="auth-input-field"
@@ -366,14 +368,14 @@ export function AuthScreen({ onLoginSuccess }) {
 
             <div className="auth-input-group">
               <label className="auth-input-label">
-                <Mail size={14} /> Email Address
+                <Mail size={14} color="#818cf8" /> Email Address
               </label>
               <div className="auth-input-wrapper">
                 <Mail className="auth-input-icon" size={18} />
                 <input
                   type="email"
                   required
-                  placeholder="candidate@example.com"
+                  placeholder="Enter your email address"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="auth-input-field"
@@ -383,17 +385,18 @@ export function AuthScreen({ onLoginSuccess }) {
 
             <div className="auth-input-group">
               <label className="auth-input-label">
-                <Lock size={14} /> Password
+                <Lock size={14} color="#818cf8" /> Password
               </label>
               <div className="auth-input-wrapper">
                 <Lock className="auth-input-icon" size={18} />
                 <input
                   type={showPassword ? 'text' : 'password'}
                   required
-                  placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;"
+                  placeholder="Enter your password (min 4 chars)"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="auth-input-field"
+                  style={{ paddingRight: '44px' }}
                 />
                 <button
                   type="button"
@@ -401,13 +404,19 @@ export function AuthScreen({ onLoginSuccess }) {
                   style={{
                     position: 'absolute',
                     right: '12px',
+                    top: '50%',
+                    transform: 'translateY(-50%)',
                     background: 'none',
                     border: 'none',
                     color: 'var(--text-muted)',
                     cursor: 'pointer',
                     display: 'flex',
-                    alignItems: 'center'
+                    alignItems: 'center',
+                    padding: '4px',
+                    borderRadius: '4px',
+                    zIndex: 3
                   }}
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
                 >
                   {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
